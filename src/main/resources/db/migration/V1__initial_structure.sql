@@ -15,7 +15,7 @@ CREATE TABLE games (
     id BIGSERIAL PRIMARY KEY,
     white_player_id BIGINT NOT NULL,
     black_player_id BIGINT NOT NULL,
-    winner_id BIGINT,
+    current_player_id BIGINT,
     status VARCHAR(20) NOT NULL,
     time_control VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -25,7 +25,7 @@ CREATE TABLE games (
 
     CONSTRAINT fk_white_player FOREIGN KEY (white_player_id) REFERENCES players (id),
     CONSTRAINT fk_black_player FOREIGN KEY (black_player_id) REFERENCES players (id),
-    CONSTRAINT fk_winner_player FOREIGN KEY (winner_id) REFERENCES players (id),
+    CONSTRAINT fk_current_player FOREIGN KEY (current_player_id) REFERENCES players (id),
     CONSTRAINT chk_different_players CHECK (white_player_id <> black_player_id)
 );
 

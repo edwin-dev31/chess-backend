@@ -27,8 +27,8 @@ public class GameEntity {
     private PlayerEntity blackPlayer;
 
     @ManyToOne
-    @JoinColumn(name = "winner_id")
-    private PlayerEntity winner;
+    @JoinColumn(name = "current_player_id")
+    private PlayerEntity currentPlayer;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

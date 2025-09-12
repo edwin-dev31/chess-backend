@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface IMoveService {
-    //MoveEntity create(CreateMoveDTO dto, PlayerEntity player);
+    MoveEntity create(CreateMoveDTO dto, Long playerId);
     List<MoveEntity> findAllByGameId(Long gameId);
     Optional<MoveEntity> findById(Long id);
     MoveEntity update(Long id, UpdateMoveDTO dto);

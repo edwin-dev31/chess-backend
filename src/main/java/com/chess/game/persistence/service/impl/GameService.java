@@ -9,8 +9,7 @@ import com.chess.game.presentation.dto.game.CreateGameDTO;
 import com.chess.game.util.GameStatus;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
+import com.github.bhlangonijr.chesslib.Board;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +36,7 @@ public class GameService implements IGameService {
                 .builder()
                 .blackPlayer(player1)
                 .whitePlayer(player2)
+                .currentPlayer(player2)
                 .status(GameStatus.WAITING)
                 .timeControl(dto.getTimeControl())
                 .createdAt(LocalDateTime.now())
@@ -47,9 +47,9 @@ public class GameService implements IGameService {
     }
 
     private String generateInitFen() {
-        return "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+        Board board = new Board();
+        return board.getFen();
     }
-
     @Override
     public List<GameEntity> findAll() {
         return gameRepository.findAll();
@@ -80,5 +80,20 @@ public class GameService implements IGameService {
         GameEntity game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
         return game.getPgn();
+    }
+
+    @Override
+    public GameEntity startGame(Long gameId) {
+        System.out.println("Hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee 1");
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+        System.out.println("Hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee 2");
+        if (game.getStatus() != GameStatus.WAITING) {
+            throw new IllegalStateException("Game cannot be started, its current status is: " + game.getStatus());
+        }
+        System.out.println("Hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee 3");
+        game.setStatus(GameStatus.PLAYING);
+        System.out.println("Hereeeeeeeeeeeeeeeeeeeeeeeeeeeeee 4");
+        return gameRepository.save(game);
     }
 }

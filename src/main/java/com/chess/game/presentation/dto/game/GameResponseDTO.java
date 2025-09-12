@@ -17,7 +17,7 @@ public class GameResponseDTO {
     private Long id;
     private PlayerResponseDTO whitePlayer;
     private PlayerResponseDTO blackPlayer;
-    private PlayerResponseDTO winner;
+    private PlayerResponseDTO currentPlayer;
     private GameStatus status;
     private String timeControl;
     private LocalDateTime createdAt;

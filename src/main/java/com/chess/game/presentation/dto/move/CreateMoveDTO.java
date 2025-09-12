@@ -19,5 +19,4 @@ public class CreateMoveDTO {
     @NotBlank
     private String toSquare;
 
-    private String fen;
 }

@@ -38,5 +38,11 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
 		return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
 	}
+
+	@ExceptionHandler(InvalidJwtException.class)
+	public ResponseEntity<ErrorResponse> handleInvalidJwt(InvalidJwtException ex) {
+		ErrorResponse error = new ErrorResponse(ex.getMessage());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+	}
 }
 

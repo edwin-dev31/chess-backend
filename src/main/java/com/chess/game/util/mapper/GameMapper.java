@@ -22,7 +22,7 @@ public class GameMapper implements MapperGeneric<GameEntity, GameResponseDTO> {
                 .id(gameEntity.getId())
                 .whitePlayer(playerMapper.mapTo(gameEntity.getWhitePlayer()))
                 .blackPlayer(playerMapper.mapTo(gameEntity.getBlackPlayer()))
-                .winner(gameEntity.getWinner() != null ? playerMapper.mapTo(gameEntity.getWinner()) : null)
+                .currentPlayer(gameEntity.getCurrentPlayer() != null ? playerMapper.mapTo(gameEntity.getCurrentPlayer()) : null)
                 .status(gameEntity.getStatus())
                 .timeControl(gameEntity.getTimeControl())
                 .createdAt(gameEntity.getCreatedAt())
