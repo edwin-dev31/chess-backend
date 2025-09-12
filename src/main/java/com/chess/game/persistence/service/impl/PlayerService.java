@@ -65,7 +65,8 @@ public class PlayerService implements IPlayerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + id));
 
         if (dto.getUsername() != null) {
-            repository.findByUsername(dto.getUsername()).ifPresent(p -> {
+            Optional<PlayerEntity> temPlayer = repository.findByUsername(dto.getUsername());
+            temPlayer.ifPresent(p -> {
                 if (!p.getId().equals(id)) {
                     throw new DuplicateResourceException("Username already exists: " + dto.getUsername());
                 }

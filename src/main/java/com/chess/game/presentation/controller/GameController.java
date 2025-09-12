@@ -36,6 +36,11 @@ public class GameController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping
+    public ResponseEntity<?> save(@RequestBody CreateGameDTO dto){
+        return ResponseEntity.ok(gameService.createGame(dto));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteById(@PathVariable Long id) {
         gameService.deleteById(id);

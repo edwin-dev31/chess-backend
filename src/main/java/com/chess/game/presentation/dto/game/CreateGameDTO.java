@@ -13,5 +13,6 @@ public class CreateGameDTO {
     private Long whitePlayerId;
     @NotNull
     private Long blackPlayerId;
+    @NotNull
     private String timeControl;
 }

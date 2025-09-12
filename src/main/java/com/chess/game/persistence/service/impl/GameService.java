@@ -32,7 +32,7 @@ public class GameService implements IGameService {
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getBlackPlayerId()));
         PlayerEntity player2 = playerRepository.findById(dto.getWhitePlayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getWhitePlayerId()));
-
+        System.out.println("Holaaaaaaaaaaaaa      ");
         GameEntity newGame = GameEntity
                 .builder()
                 .blackPlayer(player1)
