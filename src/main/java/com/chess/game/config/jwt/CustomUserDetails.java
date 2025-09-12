@@ -1,7 +1,7 @@
 package com.chess.game.config.jwt;
 
-import com.chess.game.persistence.entity.PlayerEntity;
-import com.chess.game.persistence.repository.IPlayerRepository;
+import com.chess.game.infrastructure.entity.PlayerEntity;
+import com.chess.game.infrastructure.repository.IPlayerRepository;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;

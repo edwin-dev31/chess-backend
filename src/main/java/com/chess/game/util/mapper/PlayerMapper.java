@@ -1,7 +1,7 @@
 package com.chess.game.util.mapper;
 
-import com.chess.game.persistence.entity.PlayerEntity;
-import com.chess.game.presentation.dto.player.PlayerResponseDTO;
+import com.chess.game.infrastructure.entity.PlayerEntity;
+import com.chess.game.application.dto.player.PlayerResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

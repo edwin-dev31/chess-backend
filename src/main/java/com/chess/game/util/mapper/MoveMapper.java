@@ -1,7 +1,7 @@
 package com.chess.game.util.mapper;
 
-import com.chess.game.persistence.entity.MoveEntity;
-import com.chess.game.presentation.dto.move.MoveResponseDTO;
+import com.chess.game.infrastructure.entity.MoveEntity;
+import com.chess.game.application.dto.move.MoveResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

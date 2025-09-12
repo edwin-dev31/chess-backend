@@ -1,9 +1,9 @@
 package com.chess.game.config.security;
 
 import com.chess.game.config.jwt.JwtUtil;
-import com.chess.game.persistence.entity.PlayerEntity;
-import com.chess.game.persistence.service.impl.PlayerService;
-import com.chess.game.presentation.dto.player.CreatePlayerDTO;
+import com.chess.game.infrastructure.entity.PlayerEntity;
+import com.chess.game.application.service.impl.PlayerService;
+import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

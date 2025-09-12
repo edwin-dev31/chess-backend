@@ -1,6 +1,6 @@
 package com.chess.game.config.jwt;
 
-import com.chess.game.persistence.entity.PlayerEntity;
+import com.chess.game.infrastructure.entity.PlayerEntity;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -50,5 +50,12 @@ public class JwtUtil {
         } catch (JwtException e) {
             return false;
         }
+    }
+
+    public Long extractId(String token) {
+        return Jwts.parserBuilder().setSigningKey(key).build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("id", Long.class);
     }
 }

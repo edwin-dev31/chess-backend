@@ -1,0 +1,50 @@
+package com.chess.game.infrastructure.entity;
+
+import com.chess.game.util.GameStatus;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+@Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "games")
+public class GameEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "white_player_id", nullable = false)
+    private PlayerEntity whitePlayer;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "black_player_id", nullable = false)
+    private PlayerEntity blackPlayer;
+
+    @ManyToOne
+    @JoinColumn(name = "current_player_id")
+    private PlayerEntity currentPlayer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private GameStatus status = GameStatus.WAITING;
+
+    @Column(length = 50)
+    private String timeControl;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    private LocalDateTime finishedAt;
+
+    @Column(columnDefinition = "TEXT")
+    private String fen;
+
+    @Column(columnDefinition = "TEXT")
+    private String pgn;
+}
