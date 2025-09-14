@@ -49,7 +49,8 @@ public class MoveService implements IMoveService {
         PlayerEntity currentPlayer = (currentTurn == Side.WHITE) ? game.getWhitePlayer() : game.getBlackPlayer();
 
         if (!currentPlayer.getId().equals(playerId)) {
-            throw new IllegalStateExceptionCustom("It's not your turn.");
+            System.out.println("Player id (param) " + playerId + "Current player "+ currentPlayer);
+            throw new IllegalStateExceptionCustom("It's not your turn." + currentTurn);
         }
 
         MoveResult moveResult = chessGameManager.makeMove(game.getFen(), dto.getFromSquare(), dto.getToSquare());

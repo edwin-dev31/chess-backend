@@ -16,12 +16,11 @@ import java.time.LocalDateTime;
 public class MoveResponseDTO {
     private Long id;
     private Long gameId;
-    private PlayerResponseDTO player;
+    private Long player;
     private int moveNumber;
     private String fromSquare;
     private String toSquare;
     private PieceType piece;
     private String san;
     private String fen;
-    private LocalDateTime createdAt;
 }

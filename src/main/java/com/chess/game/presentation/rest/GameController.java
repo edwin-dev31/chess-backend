@@ -1,6 +1,5 @@
-package com.chess.game.presentation.resController;
+package com.chess.game.presentation.rest;
 
-import com.chess.game.config.jwt.JwtUtil;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.application.service.interfaces.IGameService;
 import com.chess.game.application.dto.game.CreateGameDTO;
@@ -9,7 +8,6 @@ import com.chess.game.util.mapper.GameMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -49,12 +47,11 @@ public class GameController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}/fen")
-    public ResponseEntity<Map<String, String>> getFen(@PathVariable Long id) {
-        String fen = gameService.getFenByGameId(id);
-        return ResponseEntity.ok(Map.of("fen", fen));
-    }
-
+//    @GetMapping("/{id}/fen")
+//    public ResponseEntity<Map<String, String>> getFen(@PathVariable Long id) {
+//        String fen = gameService.getFenByGameId(id);
+//        return ResponseEntity.ok(Map.of("fen", fen));
+//    }
 
     @GetMapping("/{id}/pgn")
     public ResponseEntity<Map<String, String>> getPgn(@PathVariable Long id) {
@@ -67,6 +64,12 @@ public class GameController {
     public ResponseEntity<GameResponseDTO> startGame(@PathVariable Long id) {
         GameEntity startedGame = gameService.startGame(id);
         return ResponseEntity.ok(gameMapper.mapTo(startedGame));
+    }
+
+    @GetMapping("/{gameId}/color")
+    public ResponseEntity<Map<String, String>> getCurrentPlayerColor(@PathVariable Long gameId){
+        String color = gameService.getCurrentPlayerColor(gameId);
+        return ResponseEntity.ok(Map.of("color", color));
     }
 }
 

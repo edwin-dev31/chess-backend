@@ -14,4 +14,5 @@ public interface IGameService {
     Optional<GameEntity> findById(Long id);
     void deleteById(Long id);
     GameEntity startGame(Long gameId);
+    String getCurrentPlayerColor(Long gameId);
 }

@@ -21,14 +21,13 @@ public class MoveMapper implements MapperGeneric<MoveEntity, MoveResponseDTO> {
         return MoveResponseDTO.builder()
                 .id(moveEntity.getId())
                 .gameId(moveEntity.getGame().getId())
-                .player(playerMapper.mapTo(moveEntity.getPlayer()))
+                .player(moveEntity.getPlayer().getId())
                 .moveNumber(moveEntity.getMoveNumber())
                 .fromSquare(moveEntity.getFromSquare())
                 .toSquare(moveEntity.getToSquare())
                 .piece(moveEntity.getPiece())
                 .san(moveEntity.getSan())
                 .fen(moveEntity.getFen())
-                .createdAt(moveEntity.getCreatedAt())
                 .build();
     }
 

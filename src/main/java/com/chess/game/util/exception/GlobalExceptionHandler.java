@@ -46,8 +46,7 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(InvalidJwtException.class)
 	public ResponseEntity<ErrorResponse> handleInvalidJwt(InvalidJwtException ex) {
-		ErrorResponse error = new ErrorResponse(ex.getMessage());
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
 	}
 }
 

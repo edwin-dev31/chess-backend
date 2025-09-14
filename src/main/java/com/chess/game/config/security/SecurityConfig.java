@@ -40,14 +40,21 @@ public class SecurityConfig {
 				request.requestMatchers(HttpMethod.POST, "/auth/login").permitAll();
 				request.requestMatchers(HttpMethod.POST, "/auth/register").permitAll();
 				request.requestMatchers(HttpMethod.GET, "/oauth2/**").permitAll();
+                request.requestMatchers("/ws/**").permitAll();
 				request.anyRequest().authenticated();
 			})
-			.formLogin(Customizer.withDefaults())
-			.oauth2Login(oauth -> oauth
-				.successHandler(oAuth2SuccessHandler)
+            .formLogin(form -> form.disable())
+            .oauth2Login(oauth -> oauth
+                .successHandler(oAuth2SuccessHandler)
 			)
 			.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-			.build();
+            .headers(headers -> headers
+                .xssProtection(Customizer.withDefaults())
+                .contentSecurityPolicy(csp ->
+                    csp.policyDirectives("frame-ancestors 'self' " + FRONTEND_BASE_URL)
+                )
+            )
+            .build();
 	}
 
 	@Bean
@@ -68,7 +75,6 @@ public class SecurityConfig {
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setAllowCredentials(true);
-
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);

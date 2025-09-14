@@ -10,7 +10,9 @@ import com.chess.game.infrastructure.repository.IPlayerRepository;
 import com.chess.game.application.service.interfaces.IGameService;
 import com.chess.game.application.dto.game.CreateGameDTO;
 import com.chess.game.util.GameStatus;
+import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
+import com.github.bhlangonijr.chesslib.Side;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -101,5 +103,19 @@ public class GameService implements IGameService {
         game.setStatus(GameStatus.PLAYING);
 
         return gameRepository.save(game);
+    }
+
+    @Override
+    public String getCurrentPlayerColor(Long gameId) {
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+
+        if (!game.getStatus().equals(GameStatus.PLAYING)) {
+            throw new IllegalStateExceptionCustom("Game is not in playing status.");
+        }
+
+        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
+
+        return currentTurn.name();
     }
 }

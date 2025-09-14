@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -25,7 +26,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		this.userDetailsService = userDetailsService;
 	}
 
-	@Override
+    private static final List<String> EXCLUDED_PATHS = List.of(
+            "/auth/",
+            "/oauth2/",
+            "/ws/"
+    );
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        boolean excluded = EXCLUDED_PATHS.stream().anyMatch(path::startsWith);
+        System.out.println("shouldNotFilter? path=" + path + " → " + excluded);
+        return excluded;
+    }
+
+
+    @Override
 	protected void doFilterInternal(HttpServletRequest request,
 			HttpServletResponse response,
 			FilterChain filterChain)
@@ -48,11 +64,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 				filterChain.doFilter(request, response);
                 return;
 			}
-			            try {
-			                email = jwtUtil.extractEmail(jwt);
-			            } catch (io.jsonwebtoken.JwtException e) {
-			                throw new InvalidJwtException("Invalid JWT Token: " + e.getMessage());
-			            }		}
+                try {
+                    email = jwtUtil.extractEmail(jwt);
+                } catch (io.jsonwebtoken.JwtException e) {
+                    throw new InvalidJwtException("Invalid JWT Token: " + e.getMessage());
+                }
+        }
 
 		if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 			var userDetails = userDetailsService.loadUserByUsername(email);

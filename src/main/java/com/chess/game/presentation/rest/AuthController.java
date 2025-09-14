@@ -1,4 +1,4 @@
-package com.chess.game.presentation.resController;
+package com.chess.game.presentation.rest;
 
 import com.chess.game.config.jwt.JwtUtil;
 import com.chess.game.infrastructure.entity.PlayerEntity;

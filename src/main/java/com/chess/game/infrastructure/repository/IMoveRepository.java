@@ -8,5 +8,4 @@ import java.util.List;
 public interface IMoveRepository extends JpaRepository<MoveEntity, Long> {
     List<MoveEntity> findAllByGameId (Long id);
     List<MoveEntity> findAllByGameIdOrderByMoveNumberAsc(Long id);
-
 }
