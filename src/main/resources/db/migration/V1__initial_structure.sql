@@ -14,7 +14,7 @@ CREATE TABLE players (
 CREATE TABLE games (
     id BIGSERIAL PRIMARY KEY,
     white_player_id BIGINT NOT NULL,
-    black_player_id BIGINT NOT NULL,
+    black_player_id BIGINT NULL,
     current_player_id BIGINT,
     status VARCHAR(20) NOT NULL,
     time_control VARCHAR(50),

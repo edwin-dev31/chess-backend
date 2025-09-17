@@ -11,7 +11,7 @@ import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.infrastructure.entity.PlayerEntity;
 import com.chess.game.infrastructure.repository.IGameRepository;
 import com.chess.game.infrastructure.repository.IMoveRepository;
-import com.chess.game.util.GameStatus;
+import com.chess.game.util.enums.GameStatus;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.github.bhlangonijr.chesslib.Side;

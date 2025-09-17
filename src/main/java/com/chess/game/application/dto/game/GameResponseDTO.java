@@ -1,7 +1,7 @@
 package com.chess.game.application.dto.game;
 
 import com.chess.game.application.dto.player.PlayerResponseDTO;
-import com.chess.game.util.GameStatus;
+import com.chess.game.util.enums.GameStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -2,8 +2,7 @@ package com.chess.game.domain;
 
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.infrastructure.entity.MoveEntity;
-import com.chess.game.util.GameResult;
-import com.chess.game.util.PieceType;
+import com.chess.game.util.enums.PieceType;
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Square;
@@ -12,7 +11,6 @@ import com.github.bhlangonijr.chesslib.move.MoveGenerator;
 import com.github.bhlangonijr.chesslib.move.MoveGeneratorException;
 import org.springframework.stereotype.Component;
 
-import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 

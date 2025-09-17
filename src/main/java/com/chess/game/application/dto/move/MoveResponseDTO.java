@@ -1,13 +1,10 @@
 package com.chess.game.application.dto.move;
 
-import com.chess.game.application.dto.player.PlayerResponseDTO;
-import com.chess.game.util.PieceType;
+import com.chess.game.util.enums.PieceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder

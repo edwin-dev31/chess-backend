@@ -1,6 +1,6 @@
 package com.chess.game.infrastructure.entity;
 
-import com.chess.game.util.PlayerStatus;
+import com.chess.game.util.enums.PlayerStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;

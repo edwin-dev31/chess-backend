@@ -1,5 +1,6 @@
 package com.chess.game.application.service.interfaces;
 
+import com.chess.game.application.dto.game.InvitationDto;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.application.dto.game.CreateGameDTO;
 
@@ -15,4 +16,8 @@ public interface IGameService {
     void deleteById(Long id);
     GameEntity startGame(Long gameId);
     String getCurrentPlayerColor(Long gameId);
+
+    InvitationDto createInvitation(Long gameId, Long fromPlayerId, Long toUserId);
+    InvitationDto acceptInvitation(Long gameId,Long playerId);
+    InvitationDto rejectInvitation(Long gameId, Long playerId);
 }

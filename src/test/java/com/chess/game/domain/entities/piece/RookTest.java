@@ -3,11 +3,9 @@ package com.chess.game.domain.entities.piece;
 import com.chess.game.domain.entities.manager.Board;
 import com.chess.game.domain.entities.manager.Move;
 import com.chess.game.domain.entities.manager.Position;
-import com.chess.game.util.Color;
+import com.chess.game.util.enums.Color;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class RookTest {
 

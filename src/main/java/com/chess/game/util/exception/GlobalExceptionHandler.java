@@ -35,18 +35,28 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-		return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+	public ResponseEntity<Map<String, String>> handleIllegalArgument(IllegalArgumentException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
 	}
 
     @ExceptionHandler(IllegalStateExceptionCustom.class)
-    public ResponseEntity<ErrorResponse> handleIllegalStateExceptionCustom(IllegalStateExceptionCustom ex) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
+    public ResponseEntity<Map<String, String>> handleIllegalStateExceptionCustom(IllegalStateExceptionCustom ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-	@ExceptionHandler(InvalidJwtException.class)
-	public ResponseEntity<ErrorResponse> handleInvalidJwt(InvalidJwtException ex) {
-        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
-	}
+    @ExceptionHandler(InvalidJwtException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidJwt(InvalidJwtException ex) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put("message", ex.getMessage());
+
+        return new ResponseEntity<>(errors, HttpStatus.CONFLICT);
+    }
+
 }
 

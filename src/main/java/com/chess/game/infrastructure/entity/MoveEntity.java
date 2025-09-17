@@ -1,7 +1,6 @@
 package com.chess.game.infrastructure.entity;
 
-import com.chess.game.util.PieceType;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.chess.game.util.enums.PieceType;
 import jakarta.persistence.*;
 import lombok.*;
 

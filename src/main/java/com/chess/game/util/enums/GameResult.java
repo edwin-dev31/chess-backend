@@ -1,4 +1,4 @@
-package com.chess.game.util;
+package com.chess.game.util.enums;
 
 public enum GameResult {
     WHITE_WIN,

@@ -1,5 +1,6 @@
 package com.chess.game.application.service.impl;
 
+import com.chess.game.application.dto.game.InvitationDto;
 import com.chess.game.domain.ChessGameManager;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.infrastructure.entity.MoveEntity;
@@ -9,7 +10,8 @@ import com.chess.game.infrastructure.repository.IMoveRepository;
 import com.chess.game.infrastructure.repository.IPlayerRepository;
 import com.chess.game.application.service.interfaces.IGameService;
 import com.chess.game.application.dto.game.CreateGameDTO;
-import com.chess.game.util.GameStatus;
+import com.chess.game.util.enums.GameStatus;
+import com.chess.game.util.enums.Invitation;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.github.bhlangonijr.chesslib.Side;
@@ -33,16 +35,13 @@ public class GameService implements IGameService {
 
     @Override
     public GameEntity createGame(CreateGameDTO dto) {
-        PlayerEntity player1 = playerRepository.findById(dto.getBlackPlayerId())
-                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getBlackPlayerId()));
-        PlayerEntity player2 = playerRepository.findById(dto.getWhitePlayerId())
+        PlayerEntity player1 = playerRepository.findById(dto.getWhitePlayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getWhitePlayerId()));
 
         GameEntity newGame = GameEntity
                 .builder()
-                .blackPlayer(player1)
-                .whitePlayer(player2)
-                .currentPlayer(player2)
+                .whitePlayer(player1)
+                .currentPlayer(player1)
                 .status(GameStatus.WAITING)
                 .timeControl(dto.getTimeControl())
                 .createdAt(LocalDateTime.now())
@@ -107,15 +106,50 @@ public class GameService implements IGameService {
 
     @Override
     public String getCurrentPlayerColor(Long gameId) {
+//        GameEntity game = gameRepository.findById(gameId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+//
+//        if (!game.getStatus().equals(GameStatus.PLAYING)) {
+//            throw new IllegalStateExceptionCustom("Game is not in playing status.");
+//        }
+//
+//        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
+//
+//        return currentTurn.name();
+        return "WRITE";
+    }
+
+    @Override
+    public InvitationDto createInvitation(Long gameId, Long fromPlayerId, Long toUserId) {
         GameEntity game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+        if(game.getWhitePlayer().getId() != fromPlayerId)
+            throw new IllegalStateExceptionCustom("You are not the creator");
 
-        if (!game.getStatus().equals(GameStatus.PLAYING)) {
-            throw new IllegalStateExceptionCustom("Game is not in playing status.");
+        return new InvitationDto(gameId, fromPlayerId, toUserId, Invitation.PENDING);
+    }
+
+    @Override
+    public InvitationDto acceptInvitation(Long gameId, Long playerId) {
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+        if (!game.getStatus().equals(GameStatus.FINISHED) || game.getStatus().equals(GameStatus.NOT_ACCEPTED)) {
+            throw new IllegalStateExceptionCustom("Game is not able to play.");
         }
+        game.setStatus(GameStatus.WAITING);
+        gameRepository.save(game);
 
-        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
+        return new InvitationDto(gameId, game.getWhitePlayer().getId(), playerId, Invitation.ACCEPTED);
+    }
 
-        return currentTurn.name();
+    @Override
+    public InvitationDto rejectInvitation(Long gameId, Long playerId) {
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+        game.setStatus(GameStatus.NOT_ACCEPTED);
+        game.setFinishedAt(LocalDateTime.now());
+        gameRepository.save(game);
+
+        return new InvitationDto(gameId, game.getWhitePlayer().getId(), playerId, Invitation.REJECTED);
     }
 }
