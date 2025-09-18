@@ -2,6 +2,7 @@ package com.chess.game.application.service.impl;
 
 import com.chess.game.application.dto.game.InvitationDto;
 import com.chess.game.domain.ChessGameManager;
+import com.chess.game.domain.HashidsUtil;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.infrastructure.entity.PlayerEntity;
@@ -15,10 +16,13 @@ import com.chess.game.util.enums.Invitation;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.github.bhlangonijr.chesslib.Side;
+import com.github.bhlangonijr.chesslib.game.Game;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class GameService implements IGameService {
@@ -37,10 +41,13 @@ public class GameService implements IGameService {
     public GameEntity createGame(CreateGameDTO dto) {
         PlayerEntity player1 = playerRepository.findById(dto.getWhitePlayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getWhitePlayerId()));
+        PlayerEntity player2 = playerRepository.findById(dto.getBlackPlayerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + dto.getBlackPlayerId()));
 
         GameEntity newGame = GameEntity
                 .builder()
                 .whitePlayer(player1)
+                .blackPlayer(player2)
                 .currentPlayer(player1)
                 .status(GameStatus.WAITING)
                 .timeControl(dto.getTimeControl())
@@ -116,40 +123,70 @@ public class GameService implements IGameService {
 //        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
 //
 //        return currentTurn.name();
-        return "WRITE";
+        return "WHITE";
     }
 
     @Override
-    public InvitationDto createInvitation(Long gameId, Long fromPlayerId, Long toUserId) {
-        GameEntity game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-        if(game.getWhitePlayer().getId() != fromPlayerId)
-            throw new IllegalStateExceptionCustom("You are not the creator");
-
-        return new InvitationDto(gameId, fromPlayerId, toUserId, Invitation.PENDING);
+    public InvitationDto createInvitation(Long fromPlayerId, Long toUserId) {
+        PlayerEntity player = playerRepository.findById(fromPlayerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + fromPlayerId));
+        return InvitationDto
+                .builder()
+                .fromUserId(fromPlayerId)
+                .fromUsername(player.getUsername())
+                .toUserId(toUserId)
+                .status(Invitation.PENDING)
+                .build();
     }
 
     @Override
-    public InvitationDto acceptInvitation(Long gameId, Long playerId) {
-        GameEntity game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-        if (!game.getStatus().equals(GameStatus.FINISHED) || game.getStatus().equals(GameStatus.NOT_ACCEPTED)) {
-            throw new IllegalStateExceptionCustom("Game is not able to play.");
+    public InvitationDto acceptInvitation(Long fromPlayerId, Long toUserId) {
+        PlayerEntity player1 = playerRepository.findById(fromPlayerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + fromPlayerId));
+
+        PlayerEntity player2 = playerRepository.findById(toUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + toUserId));
+
+        Long IdWhite, Idblack;
+        int randomNum = ThreadLocalRandom.current().nextInt(2);
+
+        if (randomNum == 1) {
+            IdWhite = fromPlayerId;
+            Idblack = toUserId;
+        } else  {
+            IdWhite = toUserId;
+            Idblack = fromPlayerId;
         }
-        game.setStatus(GameStatus.WAITING);
-        gameRepository.save(game);
 
-        return new InvitationDto(gameId, game.getWhitePlayer().getId(), playerId, Invitation.ACCEPTED);
+        CreateGameDTO createGameDTO = new CreateGameDTO(IdWhite, Idblack, "");
+        GameEntity newGame = createGame(createGameDTO);
+
+        return InvitationDto
+                .builder()
+                .code(HashidsUtil.encodeId(newGame.getId()))
+                .fromUserId(fromPlayerId)
+                .fromUsername(player1.getUsername())
+                .toUserId(toUserId)
+                .toUsername(player2.getUsername())
+                .status(Invitation.ACCEPTED)
+                .build();
     }
 
     @Override
-    public InvitationDto rejectInvitation(Long gameId, Long playerId) {
-        GameEntity game = gameRepository.findById(gameId)
-                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-        game.setStatus(GameStatus.NOT_ACCEPTED);
-        game.setFinishedAt(LocalDateTime.now());
-        gameRepository.save(game);
+    public InvitationDto rejectInvitation(Long fromPlayerId, Long toUserId) {
+        PlayerEntity player1 = playerRepository.findById(fromPlayerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + fromPlayerId));
 
-        return new InvitationDto(gameId, game.getWhitePlayer().getId(), playerId, Invitation.REJECTED);
+        PlayerEntity player2 = playerRepository.findById(toUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + toUserId));
+
+        return InvitationDto
+                .builder()
+                .fromUserId(fromPlayerId)
+                .fromUsername(player1.getUsername())
+                .toUserId(toUserId)
+                .toUsername(player2.getUsername())
+                .status(Invitation.REJECTED)
+                .build();
     }
 }

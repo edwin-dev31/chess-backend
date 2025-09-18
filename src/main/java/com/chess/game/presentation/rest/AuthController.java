@@ -7,12 +7,14 @@ import com.chess.game.application.dto.player.AuthResponse;
 import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.application.dto.player.LoginPlayerDTO;
 import com.chess.game.application.dto.player.PlayerResponseDTO;
+import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.chess.game.util.mapper.PlayerMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,13 +45,17 @@ public class AuthController {
         PlayerEntity player = service.findByEmail(request.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found: " + request.getEmail()));
 
-        var auth = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
-        authManager.authenticate(auth);
+        try{
+            var auth = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
+            authManager.authenticate(auth);
 
-        String jwt = jwtUtil.generateToken(player);
-        PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
+            String jwt = jwtUtil.generateToken(player);
+            PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
 
-        return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
+            return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
+        } catch (AuthenticationException e){
+            throw new IllegalStateExceptionCustom("Ilegal credentials");
+        }
     }
 
     @PostMapping("/register")
@@ -57,10 +63,19 @@ public class AuthController {
         Optional<PlayerEntity> existing = service.findByEmail(dto.getEmail());
 
         if (existing.isPresent()) {
-            PlayerEntity player = existing.get();
-            String jwt = jwtUtil.generateToken(player);
-            PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
-            return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
+            try {
+                PlayerEntity player = existing.get();
+                var auth = new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword());
+                authManager.authenticate(auth);
+
+                String jwt = jwtUtil.generateToken(player);
+                PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
+
+                return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
+            } catch (AuthenticationException e){
+                throw new IllegalStateExceptionCustom("Error in autentication: " + e.getMessage());
+            }
+
         }
 
         PlayerEntity created = service.save(dto);

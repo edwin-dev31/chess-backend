@@ -26,6 +26,14 @@ public class PlayerService implements IPlayerService {
 
     @Override
     public PlayerEntity save(CreatePlayerDTO dto) {
+        if (repository.findByEmail(dto.getEmail()).isPresent()){
+            throw new DuplicateResourceException("Email already exists: " + dto.getEmail());
+        }
+
+        if (repository.findByUsername(dto.getUsername()).isPresent()){
+            throw new DuplicateResourceException("Username already exists");
+        }
+
         PlayerEntity entity = PlayerEntity
                 .builder()
                 .username(dto.getUsername())
@@ -34,9 +42,7 @@ public class PlayerService implements IPlayerService {
                 .createdAt(LocalDateTime.now())
                 .build();
 
-        if (repository.findByEmail(dto.getEmail()).isPresent()){
-            throw new DuplicateResourceException("Email already exists: " + dto.getEmail());
-        }
+
 
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         PlayerEntity saved = repository.save(entity);

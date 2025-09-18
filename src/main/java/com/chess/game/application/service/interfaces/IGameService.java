@@ -17,7 +17,7 @@ public interface IGameService {
     GameEntity startGame(Long gameId);
     String getCurrentPlayerColor(Long gameId);
 
-    InvitationDto createInvitation(Long gameId, Long fromPlayerId, Long toUserId);
-    InvitationDto acceptInvitation(Long gameId,Long playerId);
-    InvitationDto rejectInvitation(Long gameId, Long playerId);
+    InvitationDto createInvitation(Long fromPlayerId, Long toUserId);
+    InvitationDto acceptInvitation(Long fromPlayerId, Long toUserId);
+    InvitationDto rejectInvitation(Long fromPlayerId, Long toUserId);
 }

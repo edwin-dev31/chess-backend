@@ -27,13 +27,13 @@ public class InvitateGameController {
         this.messagingTemplate = messagingTemplate;
     }
 
-    @PostMapping("/{gameId}/invite")
-    public ResponseEntity<Map<String, String>> invitePlayer(@PathVariable Long gameId, @RequestParam Long toUserId,
+    @PostMapping("/{toUserId}/invite")
+    public ResponseEntity<Map<String, String>> invitePlayer(@PathVariable Long toUserId,
                                                @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         Long fromPlayerId = jwt.extractId(token);
 
-        InvitationDto invitation = gameService.createInvitation(gameId, fromPlayerId, toUserId);
+        InvitationDto invitation = gameService.createInvitation(fromPlayerId, toUserId);
 
         messagingTemplate.convertAndSendToUser(
                 toUserId.toString(),
@@ -44,16 +44,21 @@ public class InvitateGameController {
         return ResponseEntity.ok(Map.of("message", invitation + ""));
     }
 
-    @PostMapping("/{gameId}/accept")
-    public ResponseEntity<Map<String, String>> acceptInvitation(@PathVariable Long gameId,
+    @PostMapping("/{fromPlayerId}/accept")
+    public ResponseEntity<Map<String, String>> acceptInvitation(@PathVariable Long fromPlayerId,
                                                           @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
-        Long playerId = jwt.extractId(token);
+        Long toPlayerId = jwt.extractId(token);
 
-        InvitationDto invitation = gameService.acceptInvitation(gameId, playerId);
+        InvitationDto invitation = gameService.acceptInvitation(fromPlayerId, toPlayerId);
 
         messagingTemplate.convertAndSendToUser(
                 invitation.getFromUserId().toString(),
+                "/queue/invitations",
+                invitation
+        );
+        messagingTemplate.convertAndSendToUser(
+                invitation.getToUserId().toString(),
                 "/queue/invitations",
                 invitation
         );
@@ -61,13 +66,13 @@ public class InvitateGameController {
         return ResponseEntity.ok(Map.of("message", "Invitation accepted"));
     }
 
-    @PostMapping("/{gameId}/reject")
-    public ResponseEntity<Map<String, String>> rejectInvitation(@PathVariable Long gameId,
+    @PostMapping("/{toPlayerId}/reject")
+    public ResponseEntity<Map<String, String>> rejectInvitation(@PathVariable Long toPlayerId,
                                                           @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);
         Long playerId = jwt.extractId(token);
 
-        InvitationDto invitation = gameService.rejectInvitation(gameId, playerId);
+        InvitationDto invitation = gameService.rejectInvitation(toPlayerId, playerId);
 
         messagingTemplate.convertAndSendToUser(
                 invitation.getFromUserId().toString(),
