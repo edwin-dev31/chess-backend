@@ -57,12 +57,6 @@ public class GameController {
         return ResponseEntity.noContent().build();
     }
 
-//    @GetMapping("/{id}/fen")
-//    public ResponseEntity<Map<String, String>> getFen(@PathVariable Long id) {
-//        String fen = gameService.getFenByGameId(id);
-//        return ResponseEntity.ok(Map.of("fen", fen));
-//    }
-
     @GetMapping("/{id}/pgn")
     public ResponseEntity<Map<String, String>> getPgn(@PathVariable String id) {
         String pgn = gameService.getPgnByGameId(HashidsUtil.decodeId(id));
@@ -71,21 +65,12 @@ public class GameController {
 
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<GameResponseDTO> startGame(@PathVariable String id,
-                                                     @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        Long playerId = jwt.extractId(token);
+    public ResponseEntity<GameResponseDTO> startGame(@PathVariable String id){
 
         GameEntity startedGame = gameService.startGame(HashidsUtil.decodeId(id));
 
-        String whitePlayerId, blackPlayerId;
-        if (startedGame.getWhitePlayer().getId() == playerId){
-            whitePlayerId = startedGame.getWhitePlayer().getId().toString();
-            blackPlayerId = startedGame.getBlackPlayer().getId().toString();
-        } else {
-            whitePlayerId = startedGame.getBlackPlayer().getId().toString();
-            blackPlayerId = startedGame.getWhitePlayer().getId().toString();
-        }
+        String whitePlayerId = startedGame.getWhitePlayer().getId().toString();
+        String blackPlayerId = startedGame.getBlackPlayer().getId().toString();
 
         messagingTemplate.convertAndSendToUser(
                 whitePlayerId,

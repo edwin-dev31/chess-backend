@@ -14,9 +14,11 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
-import static com.chess.game.util.AppRoutes.FRONTEND_BASE_URL;
+import static com.chess.game.util.AppRoutes.FRONTEND_REDIRECTION_URL;
 
 @Component
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
@@ -48,6 +50,12 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
         }
 
         if (userService.findByEmail(email).isEmpty()) {
+            Optional<PlayerEntity> player = userService.findByUsername(username);
+            if(!player.isEmpty()){
+                Random random = new Random();
+                int numero = 1000 + random.nextInt(9000);
+                username += numero;
+            }
             CreatePlayerDTO dto = new CreatePlayerDTO();
             dto.setUsername(username);
             dto.setEmail(email);
@@ -59,7 +67,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
 
         String jwt = jwtUtil.generateToken(player);
-        String redirectUrl = FRONTEND_BASE_URL + jwt;
+        String redirectUrl = FRONTEND_REDIRECTION_URL + jwt;
 
         response.sendRedirect(redirectUrl);
     }

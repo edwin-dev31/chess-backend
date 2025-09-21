@@ -3,6 +3,7 @@ package com.chess.game.domain;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.util.enums.PieceType;
+import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.github.bhlangonijr.chesslib.Board;
 import com.github.bhlangonijr.chesslib.Piece;
 import com.github.bhlangonijr.chesslib.Square;
@@ -43,37 +44,57 @@ public class ChessGameManager {
                 Square.valueOf(toSquare.toUpperCase())
         );
 
-        Move move;
         try {
             List<Move> legalMoves = MoveGenerator.generateLegalMoves(board);
-            move = legalMoves.stream()
-                    .filter(m -> m.getFrom().equals(moveInput.getFrom()) && m.getTo().equals(moveInput.getTo()))
+            List<Move> pseudoMoves = MoveGenerator.generatePseudoLegalMoves(board);
+
+            if (legalMoves.isEmpty()) {
+                if (board.isKingAttacked()) {
+                    throw new IllegalStateExceptionCustom("Checkmate: no legal moves.");
+                } else {
+                    throw new IllegalStateExceptionCustom("Stalemate: no legal moves.");
+                }
+            }
+
+            boolean isPseudo = pseudoMoves.stream()
+                    .anyMatch(m -> m.getFrom().equals(moveInput.getFrom())
+                            && m.getTo().equals(moveInput.getTo()));
+
+            if (!isPseudo) {
+                throw new IllegalStateExceptionCustom("Illegal move: Piece cannot move that way.");
+            }
+
+            Move move = legalMoves.stream()
+                    .filter(m -> m.getFrom().equals(moveInput.getFrom())
+                            && m.getTo().equals(moveInput.getTo()))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Illegal move: " + fromSquare + toSquare));
+                    .orElseThrow(() -> new IllegalStateExceptionCustom(
+                            "Illegal move: This move would leave your king in check."));
+
+            board.doMove(move);
+
+            GameEndStatus endStatus = GameEndStatus.IN_PROGRESS;
+            if (board.isMated()) {
+                endStatus = GameEndStatus.MATED;
+            } else if (board.isStaleMate() || board.isDraw()) {
+                endStatus = GameEndStatus.DRAW;
+            }
+
+            Piece movedPiece = board.getPiece(move.getTo());
+            PieceType pieceType = PieceType.valueOf(movedPiece.getPieceType().name());
+
+            return MoveResult.builder()
+                    .newFen(board.getFen())
+                    .sanMove(move.toString())
+                    .movedPiece(pieceType)
+                    .moveNumber(board.getMoveCounter())
+                    .sideToMove(board.getSideToMove())
+                    .endStatus(endStatus)
+                    .build();
+
         } catch (MoveGeneratorException e) {
-            throw new IllegalStateException("Could not generate legal moves for the given FEN.", e);
+            throw new IllegalStateExceptionCustom("Could not generate legal moves." + e);
         }
-
-        board.doMove(move);
-
-        GameEndStatus endStatus = GameEndStatus.IN_PROGRESS;
-        if (board.isMated()) {
-            endStatus = GameEndStatus.MATED;
-        } else if (board.isStaleMate() || board.isDraw()) {
-            endStatus = GameEndStatus.DRAW;
-        }
-
-        Piece movedPiece = board.getPiece(move.getTo());
-        PieceType pieceType = PieceType.valueOf(movedPiece.getPieceType().name());
-
-        return MoveResult.builder()
-                .newFen(board.getFen())
-                .sanMove(move.toString())
-                .movedPiece(pieceType)
-                .moveNumber(board.getMoveCounter())
-                .sideToMove(board.getSideToMove())
-                .endStatus(endStatus)
-                .build();
     }
 
     public static String buildPgn(GameEntity game, List<MoveEntity> moves) {
