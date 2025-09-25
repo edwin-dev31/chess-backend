@@ -13,6 +13,7 @@ import com.chess.game.application.service.interfaces.IGameService;
 import com.chess.game.application.dto.game.CreateGameDTO;
 import com.chess.game.util.enums.GameStatus;
 import com.chess.game.util.enums.Invitation;
+import com.chess.game.util.enums.PlayerStatus;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.github.bhlangonijr.chesslib.Side;
@@ -108,22 +109,46 @@ public class GameService implements IGameService {
         }
         game.setStatus(GameStatus.PLAYING);
 
+        PlayerEntity player1 = playerRepository.findById(game.getWhitePlayer().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + game.getWhitePlayer().getId()));
+        PlayerEntity player2 = playerRepository.findById(game.getBlackPlayer().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + game.getBlackPlayer().getId()));
+
+        player1.setStatus(PlayerStatus.IN_GAME);
+        player2.setStatus(PlayerStatus.IN_GAME);
+        playerRepository.save(player1);
+        playerRepository.save(player2);
+
         return gameRepository.save(game);
     }
 
     @Override
     public String getCurrentPlayerColor(Long gameId) {
-//        GameEntity game = gameRepository.findById(gameId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
-//
-//        if (!game.getStatus().equals(GameStatus.PLAYING)) {
-//            throw new IllegalStateExceptionCustom("Game is not in playing status.");
-//        }
-//
-//        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
-//
-//        return currentTurn.name();
-        return "WHITE";
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+
+        if (!game.getStatus().equals(GameStatus.PLAYING)) {
+            throw new IllegalStateExceptionCustom("Game is not in playing status.");
+        }
+
+        Side currentTurn = game.getFen().contains(" w ") ? Side.WHITE : Side.BLACK;
+
+        return currentTurn.name();
+    }
+
+    @Override
+    public Long getOpponentId(Long gameId, Long playerId) {
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+
+        Long playerIdWhite = game.getWhitePlayer().getId();
+        Long playerIdBlack = game.getBlackPlayer().getId();
+
+        if (!playerId.equals(playerIdWhite) && !playerId.equals(playerIdBlack)) {
+            throw new ResourceNotFoundException("Player not found in this game");
+        }
+
+        return playerId.equals(playerIdWhite) ? playerIdBlack : playerIdWhite;
     }
 
     @Override

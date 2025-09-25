@@ -7,6 +7,7 @@ import com.chess.game.util.enums.PlayerStatus;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
@@ -38,19 +39,24 @@ public class PresenceEventListener {
             PlayerEntity player = playerService.findById(Long.parseLong(user.getName())).orElseThrow(
                     () -> new ResourceNotFoundException("Player not found"));
 
-            log.warn(player.toString());
             PlayerOnlineDTO dto = PlayerOnlineDTO.builder()
                     .id(player.getId())
                     .username(player.getUsername())
                     .imageUrl(player.getImageUrl())
                     .status(PlayerStatus.ONLINE)
                     .build();
-            log.warn(dto.toString());
             onlinePlayers.add(dto);
 
            // playerService.updateStatusByUsername(player.getId(), PlayerStatus.ONLINE);
 
             broadcastOnlinePlayers();
+
+            log.error("getName: " + user.getName());
+            messagingTemplate.convertAndSendToUser(
+                    user.getName().toString(),
+                    "/queue/online-players",
+                    onlinePlayers
+            );
         }
     }
 
@@ -59,7 +65,6 @@ public class PresenceEventListener {
         Principal user = event.getUser();
         if (user != null) {
             onlinePlayers.removeIf(p -> p.getUsername().equals(user.getName()));
-
             // playerService.updateStatusByUsername(user.getName(), PlayerStatus.OFFLINE);
 
             broadcastOnlinePlayers();

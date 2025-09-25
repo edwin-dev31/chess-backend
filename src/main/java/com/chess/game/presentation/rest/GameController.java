@@ -1,5 +1,6 @@
 package com.chess.game.presentation.rest;
 
+import com.chess.game.application.dto.game.GameStartDTO;
 import com.chess.game.config.jwt.JwtUtil;
 import com.chess.game.domain.HashidsUtil;
 import com.chess.game.infrastructure.entity.GameEntity;
@@ -71,16 +72,16 @@ public class GameController {
 
         String whitePlayerId = startedGame.getWhitePlayer().getId().toString();
         String blackPlayerId = startedGame.getBlackPlayer().getId().toString();
-
+        String code = HashidsUtil.encodeId(startedGame.getId());
         messagingTemplate.convertAndSendToUser(
                 whitePlayerId,
                 "/queue/start",
-                Color.WHITE
+                    new GameStartDTO(Color.WHITE, code)
         );
         messagingTemplate.convertAndSendToUser(
                 blackPlayerId,
                 "/queue/start",
-                Color.BLACK
+                new GameStartDTO(Color.BLACK, code)
         );
 
         return ResponseEntity.ok(gameMapper.mapTo(startedGame));

@@ -7,6 +7,7 @@ import com.chess.game.application.dto.player.AuthResponse;
 import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.application.dto.player.LoginPlayerDTO;
 import com.chess.game.application.dto.player.PlayerResponseDTO;
+import com.chess.game.util.enums.PlayerStatus;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.chess.game.util.mapper.PlayerMapper;
@@ -51,6 +52,7 @@ public class AuthController {
 
             String jwt = jwtUtil.generateToken(player);
             PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
+            service.updateStatus(player.getId(), PlayerStatus.ONLINE);
 
             return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
         } catch (AuthenticationException e){
@@ -70,6 +72,7 @@ public class AuthController {
 
                 String jwt = jwtUtil.generateToken(player);
                 PlayerResponseDTO playerResponse = playerMapper.mapTo(player);
+                service.updateStatus(player.getId(), PlayerStatus.ONLINE);
 
                 return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
             } catch (AuthenticationException e){
@@ -81,6 +84,7 @@ public class AuthController {
         PlayerEntity created = service.save(dto);
         String jwt = jwtUtil.generateToken(created);
         PlayerResponseDTO playerResponse = playerMapper.mapTo(created);
+        service.updateStatus(created.getId(), PlayerStatus.ONLINE);
 
         return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
     }

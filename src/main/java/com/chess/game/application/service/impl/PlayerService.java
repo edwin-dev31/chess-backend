@@ -6,6 +6,7 @@ import com.chess.game.infrastructure.repository.IPlayerRepository;
 import com.chess.game.application.service.interfaces.IPlayerService;
 import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.application.dto.player.UpdatePlayerDTO;
+import com.chess.game.util.enums.PlayerStatus;
 import com.chess.game.util.exception.DuplicateResourceException;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,12 +41,22 @@ public class PlayerService implements IPlayerService {
                 .username(dto.getUsername())
                 .email(dto.getEmail())
                 .password(dto.getPassword())
+                .status(PlayerStatus.ONLINE)
                 .createdAt(LocalDateTime.now())
                 .build();
 
         entity.setPassword(passwordEncoder.encode(dto.getPassword()));
         PlayerEntity saved = repository.save(entity);
         return saved;
+    }
+
+    @Override
+    public PlayerEntity updateStatus(Long id, PlayerStatus status){
+        PlayerEntity playerToUpdate = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + id));
+        playerToUpdate.setStatus(status);
+
+        return repository.save(playerToUpdate);
     }
 
     @Override
@@ -79,6 +90,15 @@ public class PlayerService implements IPlayerService {
     @Override
     public Optional<PlayerEntity> findByUsername(String name) {
         return repository.findByUsername(name);
+    }
+
+
+    @Override
+    public PlayerStatus getPlayerStatus(Long playerId) {
+        PlayerEntity player = repository.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + playerId));
+
+        return player.getStatus();
     }
 
     @Override
