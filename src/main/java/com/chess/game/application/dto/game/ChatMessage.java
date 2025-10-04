@@ -9,7 +9,9 @@ import java.time.LocalDateTime;
 @Builder
 public class ChatMessage{
     private Long from;
+    private String fromUsername;
     private Long to;
+    private String toUsername;
     private String content;
     private LocalDateTime createAt;
 }

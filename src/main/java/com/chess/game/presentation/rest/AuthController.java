@@ -1,6 +1,7 @@
 package com.chess.game.presentation.rest;
 
 import com.chess.game.config.jwt.JwtUtil;
+import com.chess.game.config.socket.PresenceEventListener;
 import com.chess.game.infrastructure.entity.PlayerEntity;
 import com.chess.game.application.service.interfaces.IPlayerService;
 import com.chess.game.application.dto.player.AuthResponse;
@@ -12,17 +13,16 @@ import com.chess.game.util.exception.IllegalStateExceptionCustom;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import com.chess.game.util.mapper.PlayerMapper;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -30,15 +30,17 @@ public class AuthController {
     private final AuthenticationManager authManager;
     private final JwtUtil jwtUtil;
     private final PlayerMapper playerMapper;
+    private final PresenceEventListener presenceEventListener;
 
     public AuthController(IPlayerService service,
                           AuthenticationManager authManager,
                           JwtUtil jwtUtil,
-                          PlayerMapper playerMapper) {
+                          PlayerMapper playerMapper, PresenceEventListener presenceEventListener) {
         this.service = service;
         this.authManager = authManager;
         this.jwtUtil = jwtUtil;
         this.playerMapper = playerMapper;
+        this.presenceEventListener = presenceEventListener;
     }
 
     @PostMapping("/login")
@@ -88,4 +90,24 @@ public class AuthController {
 
         return ResponseEntity.ok(new AuthResponse(jwt, playerResponse));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long playerId = jwtUtil.extractId(token);
+
+        log.error("1");
+        PlayerEntity player = service.findById(playerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with ID: " + playerId));
+
+        log.error("2");
+        service.updateStatus(playerId, PlayerStatus.OFFLINE);
+
+        log.error("3");
+        presenceEventListener.removeOnlinePlayer(playerId.toString());
+
+        log.error("4");
+        return ResponseEntity.ok("Logout successful for player: " + player.getUsername());
+    }
+
 }

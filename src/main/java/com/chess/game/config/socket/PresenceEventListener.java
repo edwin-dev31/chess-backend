@@ -7,7 +7,6 @@ import com.chess.game.util.enums.PlayerStatus;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
-import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
@@ -47,16 +46,9 @@ public class PresenceEventListener {
                     .build();
             onlinePlayers.add(dto);
 
-           // playerService.updateStatusByUsername(player.getId(), PlayerStatus.ONLINE);
+            playerService.updateStatus(player.getId(), PlayerStatus.ONLINE);
 
             broadcastOnlinePlayers();
-
-            log.error("getName: " + user.getName());
-            messagingTemplate.convertAndSendToUser(
-                    user.getName().toString(),
-                    "/queue/online-players",
-                    onlinePlayers
-            );
         }
     }
 
@@ -64,15 +56,22 @@ public class PresenceEventListener {
     public void handleSessionDisconnected(SessionDisconnectEvent event) {
         Principal user = event.getUser();
         if (user != null) {
-            onlinePlayers.removeIf(p -> p.getUsername().equals(user.getName()));
-            // playerService.updateStatusByUsername(user.getName(), PlayerStatus.OFFLINE);
+            PlayerEntity player = playerService.findById(Long.parseLong(user.getName())).orElseThrow(
+                    () -> new ResourceNotFoundException("Player not found"));
 
-            broadcastOnlinePlayers();
+            removeOnlinePlayer(user.getName());
+            playerService.updateStatus(player.getId(), PlayerStatus.OFFLINE);
+
         }
     }
 
     private void broadcastOnlinePlayers() {
         messagingTemplate.convertAndSend("/topic/online-players", onlinePlayers);
+    }
+
+    public void removeOnlinePlayer(String playerId) {
+        onlinePlayers.removeIf(p -> String.valueOf(p.getId()).equals(playerId));
+        broadcastOnlinePlayers();
     }
 
     public Set<PlayerOnlineDTO> getOnlinePlayers() {

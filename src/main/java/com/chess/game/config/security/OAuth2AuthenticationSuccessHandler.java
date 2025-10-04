@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -35,14 +36,16 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException {
         DefaultOAuth2User oAuth2User = (DefaultOAuth2User) authentication.getPrincipal();
-        String registrationId = ((org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+        String registrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
 
         String email = null;
         String username = null;
+        String imageUrl = null;
 
         if (registrationId.equals("google")) {
             email = oAuth2User.getAttribute("email");
             username = oAuth2User.getAttribute("name");
+            imageUrl = oAuth2User.getAttribute("picture");
         }
 
         if (email == null || username == null) {
@@ -59,6 +62,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             CreatePlayerDTO dto = new CreatePlayerDTO();
             dto.setUsername(username);
             dto.setEmail(email);
+            dto.setImageUrl(imageUrl);
             dto.setPassword(UUID.randomUUID().toString());
 
             userService.save(dto);

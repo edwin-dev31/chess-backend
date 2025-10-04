@@ -42,6 +42,7 @@ public class PlayerService implements IPlayerService {
                 .email(dto.getEmail())
                 .password(dto.getPassword())
                 .status(PlayerStatus.ONLINE)
+                .imageUrl((dto.getImageUrl() != null)? dto.getImageUrl() : null )
                 .createdAt(LocalDateTime.now())
                 .build();
 

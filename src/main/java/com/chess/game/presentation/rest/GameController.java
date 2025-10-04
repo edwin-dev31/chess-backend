@@ -70,18 +70,30 @@ public class GameController {
 
         GameEntity startedGame = gameService.startGame(HashidsUtil.decodeId(id));
 
-        String whitePlayerId = startedGame.getWhitePlayer().getId().toString();
-        String blackPlayerId = startedGame.getBlackPlayer().getId().toString();
+        Long whitePlayerId = startedGame.getWhitePlayer().getId();
+        Long blackPlayerId = startedGame.getBlackPlayer().getId();
         String code = HashidsUtil.encodeId(startedGame.getId());
         messagingTemplate.convertAndSendToUser(
-                whitePlayerId,
+                whitePlayerId.toString(),
                 "/queue/start",
-                    new GameStartDTO(Color.WHITE, code)
+                GameStartDTO.builder()
+                        .color(Color.WHITE)
+                        .code(code)
+                        .opponentId(blackPlayerId)
+                        .opponentUsername(startedGame.getBlackPlayer().getUsername())
+                        .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
+                        .build()
         );
         messagingTemplate.convertAndSendToUser(
-                blackPlayerId,
+                blackPlayerId.toString(),
                 "/queue/start",
-                new GameStartDTO(Color.BLACK, code)
+                GameStartDTO.builder()
+                        .color(Color.BLACK)
+                        .code(code)
+                        .opponentId(whitePlayerId)
+                        .opponentUsername(startedGame.getWhitePlayer().getUsername())
+                        .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
+                        .build()
         );
 
         return ResponseEntity.ok(gameMapper.mapTo(startedGame));

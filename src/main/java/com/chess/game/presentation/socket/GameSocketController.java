@@ -3,6 +3,7 @@ package com.chess.game.presentation.socket;
 import com.chess.game.application.dto.game.ChatMessage;
 import com.chess.game.application.dto.game.ChatMessageRequest;
 import com.chess.game.application.service.interfaces.IGameService;
+import com.chess.game.application.service.interfaces.IPlayerService;
 import com.chess.game.config.jwt.JwtUtil;
 import com.chess.game.domain.HashidsUtil;
 import com.chess.game.util.exception.IllegalStateExceptionCustom;
@@ -23,11 +24,13 @@ import java.util.Map;
 public class GameSocketController {
 
     private final IGameService gameService;
+    private final IPlayerService playerService;
     private final JwtUtil jwt;
     private final SimpMessagingTemplate messagingTemplate;
 
-    public GameSocketController(IGameService gameService, JwtUtil jwt, SimpMessagingTemplate messagingTemplate) {
+    public GameSocketController(IGameService gameService, IPlayerService playerService, JwtUtil jwt, SimpMessagingTemplate messagingTemplate) {
         this.gameService = gameService;
+        this.playerService = playerService;
         this.jwt = jwt;
         this.messagingTemplate = messagingTemplate;
     }
@@ -49,7 +52,7 @@ public class GameSocketController {
     @MessageMapping("/{gameId}/chat")
     public void sendPrivate(@DestinationVariable String gameId,
                             ChatMessageRequest message,
-                            Principal principal) {   // ✅ viene del interceptor
+                            Principal principal) {
 
         String hash = DigestUtils.md5Hex(message.getContent());
         if (!hash.equals(message.getMd5())) {
@@ -61,7 +64,9 @@ public class GameSocketController {
 
         ChatMessage chatMessage = ChatMessage.builder()
                 .from(playerId)
+                .fromUsername(playerService.getProfile(playerId).getUsername())
                 .to(opponentId)
+                .toUsername(playerService.getProfile(opponentId).getUsername())
                 .content(message.getContent())
                 .build();
 

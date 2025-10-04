@@ -27,7 +27,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	}
 
     private static final List<String> EXCLUDED_PATHS = List.of(
-            "/auth/",
+            "/auth/login",
+            "/auth/register",
             "/oauth2/",
             "/ws/"
     );
@@ -49,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		final String requestURI = request.getRequestURI();
 		System.out.println("JWT FILTER checking request: " + requestURI);
 
-		if (requestURI.contains("/auth/")) {
+		if (requestURI.contains("/auth/login")|| requestURI.contains("/auth/register")) {
 			filterChain.doFilter(request, response);
             return;
 		}

@@ -70,6 +70,7 @@ public class PlayerController {
     public Set<PlayerOnlineDTO> getOnlinePlayers() {
         return presence.getOnlinePlayers();
     }
+
     @SubscribeMapping("/online-players")
     public Set<PlayerOnlineDTO> sendCurrentPlayers() {
         return presence.getOnlinePlayers();
