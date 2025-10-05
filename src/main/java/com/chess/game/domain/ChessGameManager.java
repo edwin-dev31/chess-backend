@@ -23,18 +23,6 @@ public class ChessGameManager {
         return board.getFen();
     }
 
-    public boolean isMoveLegal(String fen, String sanMove) {
-        try {
-            Board board = new Board();
-            board.loadFromFen(fen);
-            List<Move> legalMoves = MoveGenerator.generateLegalMoves(board);
-            return legalMoves.stream().anyMatch(move -> move.getSan().equals(sanMove));
-        } catch (MoveGeneratorException e) {
-
-            return false;
-        }
-    }
-
     public MoveResult makeMove(String fen, String fromSquare, String toSquare) {
         Board board = new Board();
         board.loadFromFen(fen);
@@ -48,11 +36,12 @@ public class ChessGameManager {
             List<Move> legalMoves = MoveGenerator.generateLegalMoves(board);
             List<Move> pseudoMoves = MoveGenerator.generatePseudoLegalMoves(board);
 
+            System.out.println("legal moves: " + legalMoves);
             if (legalMoves.isEmpty()) {
                 if (board.isKingAttacked()) {
-                    throw new IllegalStateExceptionCustom("Checkmate: no legal moves.");
+                    throw new IllegalStateExceptionCustom("Checkmate! The game is over.");
                 } else {
-                    throw new IllegalStateExceptionCustom("Stalemate: no legal moves.");
+                    throw new IllegalStateExceptionCustom("Stalemate! It's a draw.");
                 }
             }
 
@@ -74,11 +63,15 @@ public class ChessGameManager {
             board.doMove(move);
 
             GameEndStatus endStatus = GameEndStatus.IN_PROGRESS;
-            if (board.isMated()) {
-                endStatus = GameEndStatus.MATED;
-            } else if (board.isStaleMate() || board.isDraw()) {
-                endStatus = GameEndStatus.DRAW;
-            }
+
+
+//            if (board.isMated()) {
+//                throw new IllegalStateExceptionCustom("Checkmate! The game is over.");
+//            } else if (board.isStaleMate()) {
+//                throw new IllegalStateExceptionCustom("Stalemate! It's a draw.");
+//            } else if (board.isDraw() || board.isRepetition() || board.getHalfMoveCounter() >= 100) {
+//                throw new IllegalStateExceptionCustom("Draw! No more moves available.");
+//            }
 
             Piece movedPiece = board.getPiece(move.getTo());
             PieceType pieceType = PieceType.valueOf(movedPiece.getPieceType().name());
@@ -93,9 +86,10 @@ public class ChessGameManager {
                     .build();
 
         } catch (MoveGeneratorException e) {
-            throw new IllegalStateExceptionCustom("Could not generate legal moves." + e);
+            throw new IllegalStateExceptionCustom("Could not generate legal moves: " + e.getMessage());
         }
     }
+
 
     public static String buildPgn(GameEntity game, List<MoveEntity> moves) {
         StringBuilder pgnBuilder = new StringBuilder();
@@ -105,12 +99,12 @@ public class ChessGameManager {
 
         pgnBuilder.append("[Event \"Casual Game\"]\n");
         pgnBuilder.append("[Site \"Local\"]\n");
-        pgnBuilder.append("[Date \"").append(game.getCreatedAt().format(dateFormat)).append("\"]\n");
-        pgnBuilder.append("[Date \"").append(dateFormat.format(game.getCreatedAt())).append("\"]\n");
+        pgnBuilder.append("[Date \"`).append(game.getCreatedAt().format(dateFormat)).append(\"]\n");
+        pgnBuilder.append("[Date \"`).append(dateFormat.format(game.getCreatedAt())).append(\"]\n");
         pgnBuilder.append("[Round \"-\"]\n");
-        pgnBuilder.append("[White \"").append(game.getWhitePlayer() != null ? game.getWhitePlayer().getUsername() : "Unknown").append("\"]\n");
-        pgnBuilder.append("[Black \"").append(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : "Unknown").append("\"]\n");
-        pgnBuilder.append("[Result \"").append(result).append("\"]\n\n");
+        pgnBuilder.append("[White \"`).append(game.getWhitePlayer() != null ? game.getWhitePlayer().getUsername() : \"Unknown\").append(\"]\n");
+        pgnBuilder.append("[Black \"`).append(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : \"Unknown\").append(\"]\n");
+        pgnBuilder.append("[Result \"`).append(result).append(\"]\n\n");
 
         int moveNumber = 1;
         for (int i = 0; i < moves.size(); i++) {

@@ -31,7 +31,7 @@ public class PresenceEventListener {
     }
 
     @EventListener
-    public void handleSessionConnected(SessionConnectEvent event) {
+    public void handleSessionConnected(SessionConnectEvent event) throws InterruptedException {
         Principal user = event.getUser();
         
         if (user != null) {
@@ -48,7 +48,17 @@ public class PresenceEventListener {
 
             playerService.updateStatus(player.getId(), PlayerStatus.ONLINE);
 
-            broadcastOnlinePlayers();
+            new Thread(() -> {
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException ignored) {}
+                broadcastOnlinePlayers();
+                messagingTemplate.convertAndSendToUser(
+                        player.getId().toString(),
+                        "/queue/online-players",
+                        onlinePlayers
+                );
+            }).start();
         }
     }
 

@@ -64,7 +64,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
             dto.setEmail(email);
             dto.setImageUrl(imageUrl);
             dto.setPassword(UUID.randomUUID().toString());
-
+            dto.setRating(1200);
             userService.save(dto);
         }
         PlayerEntity player = userService.findByEmail(email)

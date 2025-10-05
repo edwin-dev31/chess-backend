@@ -43,6 +43,7 @@ public class PlayerService implements IPlayerService {
                 .password(dto.getPassword())
                 .status(PlayerStatus.ONLINE)
                 .imageUrl((dto.getImageUrl() != null)? dto.getImageUrl() : null )
+                .rating((dto.getRating() != null) ? dto.getRating() : 1200)
                 .createdAt(LocalDateTime.now())
                 .build();
 

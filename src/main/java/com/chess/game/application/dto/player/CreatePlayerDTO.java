@@ -24,4 +24,5 @@ public class CreatePlayerDTO {
     private String email;
 
     private String imageUrl;
+    private Integer rating;
 }
