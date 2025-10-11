@@ -15,5 +15,6 @@ public class GameStartDTO {
     public String code;
     private Long opponentId;
     private String opponentUsername;
+    private Integer rating;
     private String opponentProfileImage;
 }

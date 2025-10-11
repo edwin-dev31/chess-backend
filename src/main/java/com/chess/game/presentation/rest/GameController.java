@@ -66,9 +66,9 @@ public class GameController {
 
 
     @PostMapping("/{id}/start")
-    public ResponseEntity<GameResponseDTO> startGame(@PathVariable String id){
+    public ResponseEntity<GameResponseDTO> startGame(@PathVariable String id, @RequestParam String time){
 
-        GameEntity startedGame = gameService.startGame(HashidsUtil.decodeId(id));
+        GameEntity startedGame = gameService.startGame(HashidsUtil.decodeId(id), time);
 
         Long whitePlayerId = startedGame.getWhitePlayer().getId();
         Long blackPlayerId = startedGame.getBlackPlayer().getId();
@@ -81,6 +81,7 @@ public class GameController {
                         .code(code)
                         .opponentId(blackPlayerId)
                         .opponentUsername(startedGame.getBlackPlayer().getUsername())
+                        .rating(startedGame.getBlackPlayer().getRating())
                         .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
                         .build()
         );
@@ -92,6 +93,7 @@ public class GameController {
                         .code(code)
                         .opponentId(whitePlayerId)
                         .opponentUsername(startedGame.getWhitePlayer().getUsername())
+                        .rating(startedGame.getWhitePlayer().getRating())
                         .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
                         .build()
         );
@@ -103,6 +105,15 @@ public class GameController {
     public ResponseEntity<Map<String, String>> getCurrentPlayerColor(@PathVariable String gameId){
         String color = gameService.getCurrentPlayerColor(HashidsUtil.decodeId(gameId));
         return ResponseEntity.ok(Map.of("color", color));
+    }
+
+    @PostMapping("/{gameId}/leave")
+    public ResponseEntity<Map<String, String>> leaveGame(@PathVariable String gameId, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long playerId = jwt.extractId(token);
+
+        String msg = gameService.leaveGame(HashidsUtil.decodeId(gameId), playerId);
+        return ResponseEntity.ok(Map.of("leaved", msg));
     }
 }
 

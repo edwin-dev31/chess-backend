@@ -8,10 +8,10 @@ import lombok.Data;
 @Data
 @Builder
 public class MoveResult {
-    String newFen;
-    String sanMove;
-    PieceType movedPiece;
-    int moveNumber;
-    Side sideToMove;
-    GameEndStatus endStatus;
+    private String newFen;
+    private String sanMove;
+    private PieceType movedPiece;
+    private int moveNumber;
+    private Side sideToMove;
+    private MoveStatus moveStatus;
 }

@@ -1,5 +1,6 @@
 package com.chess.game.util.mapper;
 
+import com.chess.game.application.dto.game.MoveCreatedResponseDTO;
 import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.application.dto.move.MoveResponseDTO;
 import org.springframework.stereotype.Component;
@@ -8,7 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-public class MoveMapper implements MapperGeneric<MoveEntity, MoveResponseDTO> {
+public class MoveMapper {
 
     private final PlayerMapper playerMapper;
 
@@ -16,8 +17,18 @@ public class MoveMapper implements MapperGeneric<MoveEntity, MoveResponseDTO> {
         this.playerMapper = playerMapper;
     }
 
-    @Override
-    public MoveResponseDTO mapTo(MoveEntity moveEntity) {
+
+    public MoveResponseDTO mapTo(MoveCreatedResponseDTO moveEntity) {
+        return MoveResponseDTO.builder()
+                .moveNumber(moveEntity.getMoveNumber())
+                .fromSquare(moveEntity.getFromSquare())
+                .toSquare(moveEntity.getToSquare())
+                .san(moveEntity.getSan())
+                .fen(moveEntity.getFen())
+                .build();
+    }
+
+    public MoveResponseDTO mapEntityTo(MoveEntity moveEntity) {
         return MoveResponseDTO.builder()
                 .id(moveEntity.getId())
                 .gameId(moveEntity.getGame().getId())
@@ -30,18 +41,14 @@ public class MoveMapper implements MapperGeneric<MoveEntity, MoveResponseDTO> {
                 .fen(moveEntity.getFen())
                 .build();
     }
-
-    @Override
     public MoveEntity mapFrom(MoveResponseDTO moveResponseDTO) {
         throw new UnsupportedOperationException("Cannot map from MoveResponseDTO to MoveEntity");
     }
 
-    @Override
     public List<MoveResponseDTO> mapToList(List<MoveEntity> moveEntities) {
-        return moveEntities.stream().map(this::mapTo).collect(Collectors.toList());
+        return moveEntities.stream().map(this::mapEntityTo).collect(Collectors.toList());
     }
 
-    @Override
     public List<MoveEntity> mapFromList(List<MoveResponseDTO> moveResponseDTOS) {
         throw new UnsupportedOperationException("Cannot map from a list of MoveResponseDTO to a list of MoveEntity");
     }

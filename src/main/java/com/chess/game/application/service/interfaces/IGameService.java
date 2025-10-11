@@ -15,10 +15,12 @@ public interface IGameService {
     List<GameEntity> findAll();
     Optional<GameEntity> findById(Long id);
     void deleteById(Long id);
-    GameEntity startGame(Long gameId);
+    GameEntity startGame(Long gameId, String timeControl);
     String getCurrentPlayerColor(Long gameId);
     Long getOpponentId(Long gameId, Long playerId);
     InvitationDto createInvitation(Long fromPlayerId, Long toUserId);
     InvitationDto acceptInvitation(Long fromPlayerId, Long toUserId);
     InvitationDto rejectInvitation(Long fromPlayerId, Long toUserId);
+
+    String leaveGame(Long gameId, Long playerId);
 }

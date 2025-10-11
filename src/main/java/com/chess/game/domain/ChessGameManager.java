@@ -32,6 +32,8 @@ public class ChessGameManager {
                 Square.valueOf(toSquare.toUpperCase())
         );
 
+        MoveStatus moveStatus = MoveStatus.CONTINUES;
+
         try {
             List<Move> legalMoves = MoveGenerator.generateLegalMoves(board);
             List<Move> pseudoMoves = MoveGenerator.generatePseudoLegalMoves(board);
@@ -62,16 +64,13 @@ public class ChessGameManager {
 
             board.doMove(move);
 
-            GameEndStatus endStatus = GameEndStatus.IN_PROGRESS;
-
-
-//            if (board.isMated()) {
-//                throw new IllegalStateExceptionCustom("Checkmate! The game is over.");
-//            } else if (board.isStaleMate()) {
-//                throw new IllegalStateExceptionCustom("Stalemate! It's a draw.");
-//            } else if (board.isDraw() || board.isRepetition() || board.getHalfMoveCounter() >= 100) {
-//                throw new IllegalStateExceptionCustom("Draw! No more moves available.");
-//            }
+            if (board.isMated()) {
+                moveStatus = MoveStatus.CHECKMATE;
+            } else if (board.isKingAttacked()) {
+                moveStatus = MoveStatus.CHECK;
+            } else if (board.isStaleMate() || board.isDraw() || board.isRepetition() || board.getHalfMoveCounter() >= 100) {
+                moveStatus = MoveStatus.STALEMATE;
+            }
 
             Piece movedPiece = board.getPiece(move.getTo());
             PieceType pieceType = PieceType.valueOf(movedPiece.getPieceType().name());
@@ -82,7 +81,7 @@ public class ChessGameManager {
                     .movedPiece(pieceType)
                     .moveNumber(board.getMoveCounter())
                     .sideToMove(board.getSideToMove())
-                    .endStatus(endStatus)
+                    .moveStatus(moveStatus)
                     .build();
 
         } catch (MoveGeneratorException e) {

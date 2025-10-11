@@ -100,7 +100,7 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public GameEntity startGame(Long gameId) {
+    public GameEntity startGame(Long gameId, String timeControl) {
         GameEntity game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
 
@@ -108,6 +108,7 @@ public class GameService implements IGameService {
             throw new IllegalStateException("Game cannot be started, its current status is: " + game.getStatus());
         }
         game.setStatus(GameStatus.PLAYING);
+        game.setTimeControl(timeControl);
 
         PlayerEntity player1 = playerRepository.findById(game.getWhitePlayer().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with id: " + game.getWhitePlayer().getId()));
@@ -213,5 +214,21 @@ public class GameService implements IGameService {
                 .toUsername(player2.getUsername())
                 .status(Invitation.REJECTED)
                 .build();
+    }
+
+    @Override
+    public String leaveGame(Long gameId, Long playerId) {
+        GameEntity game = gameRepository.findById(gameId)
+                .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
+
+        PlayerEntity player = playerRepository.findById(getOpponentId(gameId, playerId))
+                .orElseThrow(() -> new ResourceNotFoundException("Player not found with this game"));
+
+        game.setStatus(GameStatus.FINISHED);
+        game.setFinishedAt(LocalDateTime.now());
+        game.setCurrentPlayer(player);
+
+        gameRepository.save(game);
+        return "You leave the game successfull";
     }
 }

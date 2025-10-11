@@ -1,6 +1,9 @@
 package com.chess.game.presentation.rest;
 
+import com.chess.game.application.dto.game.GameStatusDTO;
+import com.chess.game.application.dto.game.MoveCreatedResponseDTO;
 import com.chess.game.config.jwt.JwtUtil;
+import com.chess.game.domain.MoveStatus;
 import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.application.service.interfaces.IMoveService;
 import com.chess.game.application.dto.move.CreateMoveDTO;
@@ -35,27 +38,10 @@ public class MoveController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MoveResponseDTO> findById(@PathVariable Long id) {
+    public ResponseEntity<MoveEntity> findById(@PathVariable Long id) {
         return moveService.findById(id)
-                .map(move -> ResponseEntity.ok(moveMapper.mapTo(move)))
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/{gameId}")
-    public ResponseEntity<MoveResponseDTO> create(@PathVariable Long gameId,
-                                                  @Valid @RequestBody CreateMoveDTO dto,
-                                                  @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);
-        Long playerId = jwt.extractId(token);
-
-        MoveEntity createdMove = moveService.create(dto, playerId, gameId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(moveMapper.mapTo(createdMove));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<MoveResponseDTO> update(@PathVariable Long id, @Valid @RequestBody UpdateMoveDTO dto) {
-        MoveEntity updatedMove = moveService.update(id, dto);
-        return ResponseEntity.ok(moveMapper.mapTo(updatedMove));
     }
 
     @DeleteMapping("/{id}")

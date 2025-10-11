@@ -1,11 +1,12 @@
 package com.chess.game.application.service.impl;
 
+import com.chess.game.application.dto.game.MoveCreatedResponseDTO;
 import com.chess.game.application.dto.move.CreateMoveDTO;
 import com.chess.game.application.dto.move.UpdateMoveDTO;
 import com.chess.game.application.service.interfaces.IMoveService;
 import com.chess.game.domain.ChessGameManager;
-import com.chess.game.domain.GameEndStatus;
 import com.chess.game.domain.MoveResult;
+import com.chess.game.domain.MoveStatus;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.infrastructure.entity.MoveEntity;
 import com.chess.game.infrastructure.entity.PlayerEntity;
@@ -37,7 +38,7 @@ public class MoveService implements IMoveService {
 
     @Override
     @Transactional
-    public MoveEntity create(CreateMoveDTO dto, Long playerId,Long gameId) {
+    public MoveCreatedResponseDTO create(CreateMoveDTO dto, Long playerId, Long gameId) {
         GameEntity game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
 
@@ -49,7 +50,7 @@ public class MoveService implements IMoveService {
         PlayerEntity currentPlayer = (currentTurn == Side.WHITE) ? game.getWhitePlayer() : game.getBlackPlayer();
 
         if (!currentPlayer.getId().equals(playerId)) {
-            throw new IllegalStateExceptionCustom("It's not your turn." + currentTurn);
+            throw new IllegalStateExceptionCustom("It's not your turn.");
         }
 
         MoveResult moveResult = chessGameManager.makeMove(game.getFen(), dto.getFromSquare(), dto.getToSquare());
@@ -68,23 +69,34 @@ public class MoveService implements IMoveService {
 
         game.setFen(moveResult.getNewFen());
         updatePgn(game, moveResult.getSanMove(), currentTurn);
-        updateGameStatus(game, moveResult.getEndStatus(), currentPlayer);
+        updateGameStatus(game, moveResult.getMoveStatus(), currentPlayer);
 
         gameRepository.save(game);
-        return moveRepository.save(moveEntity);
+        MoveEntity entity = moveRepository.save(moveEntity);
+        return MoveCreatedResponseDTO.builder()
+                .moveNumber(entity.getMoveNumber())
+                .fromSquare(entity.getFromSquare())
+                .toSquare(entity.getToSquare())
+                .san(entity.getSan())
+                .fen(entity.getFen())
+                .status(moveResult.getMoveStatus())
+                .winnerName((moveResult.getMoveStatus() == MoveStatus.CHECKMATE) ? currentPlayer.getUsername() : null)
+                .build();
     }
 
     private void updatePgn(GameEntity game, String sanMove, Side currentTurn) {
 
     }
 
-    private void updateGameStatus(GameEntity game, GameEndStatus endStatus, PlayerEntity playerWhoMoved) {
-        if (endStatus == GameEndStatus.MATED) {
+    private void updateGameStatus(GameEntity game, MoveStatus endStatus, PlayerEntity playerWhoMoved) {
+        if (endStatus == MoveStatus.CHECKMATE) {
             game.setStatus(GameStatus.FINISHED);
             game.setCurrentPlayer(playerWhoMoved);
-        } else if (endStatus == GameEndStatus.DRAW) {
+            game.setFinishedAt(LocalDateTime.now());
+        } else if (endStatus == MoveStatus.STALEMATE) {
             game.setStatus(GameStatus.FINISHED);
             game.setCurrentPlayer(null);
+            game.setFinishedAt(LocalDateTime.now());
         } else {
             PlayerEntity nextPlayer = playerWhoMoved.getId().equals(game.getWhitePlayer().getId())
                 ? game.getBlackPlayer()
