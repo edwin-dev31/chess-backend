@@ -11,6 +11,7 @@ import com.github.bhlangonijr.chesslib.move.Move;
 import com.github.bhlangonijr.chesslib.move.MoveGenerator;
 import com.github.bhlangonijr.chesslib.move.MoveGeneratorException;
 import org.springframework.stereotype.Component;
+import java.util.Comparator;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -89,35 +90,47 @@ public class ChessGameManager {
         }
     }
 
-
     public static String buildPgn(GameEntity game, List<MoveEntity> moves) {
         StringBuilder pgnBuilder = new StringBuilder();
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         String result = "*";
 
-        pgnBuilder.append("[Event \"Casual Game\"]\n");
-        pgnBuilder.append("[Site \"Local\"]\n");
-        pgnBuilder.append("[Date \"`).append(game.getCreatedAt().format(dateFormat)).append(\"]\n");
-        pgnBuilder.append("[Date \"`).append(dateFormat.format(game.getCreatedAt())).append(\"]\n");
-        pgnBuilder.append("[Round \"-\"]\n");
-        pgnBuilder.append("[White \"`).append(game.getWhitePlayer() != null ? game.getWhitePlayer().getUsername() : \"Unknown\").append(\"]\n");
-        pgnBuilder.append("[Black \"`).append(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : \"Unknown\").append(\"]\n");
-        pgnBuilder.append("[Result \"`).append(result).append(\"]\n\n");
+        pgnBuilder.append("[Event \"Casual Game\"]\n")
+                .append("[Site \"Local\"]\n")
+                .append("[Date \"")
+                .append(game.getCreatedAt().format(dateFormat))
+                .append("\"]\n")
+                .append("[Round \"-\"]\n")
+                .append("[White \"")
+                .append(game.getWhitePlayer() != null ? game.getWhitePlayer().getUsername() : "Unknown")
+                .append("\"]\n")
+                .append("[Black \"")
+                .append(game.getBlackPlayer() != null ? game.getBlackPlayer().getUsername() : "Unknown")
+                .append("\"]\n")
+                .append("[Result \"").append(result).append("\"]\n\n");
 
+        moves.sort(Comparator.comparingInt(MoveEntity::getMoveNumber)
+                .thenComparing(MoveEntity::getCreatedAt));
+
+        Board board = new Board();
         int moveNumber = 1;
+
         for (int i = 0; i < moves.size(); i++) {
+            MoveEntity m = moves.get(i);
+
+            Square from = Square.valueOf(m.getFromSquare().toUpperCase());
+            Square to = Square.valueOf(m.getToSquare().toUpperCase());
+
+            Move move = new Move(from, to);
+            String san = simpleSanFallback(m);
+            m.setSan(san);
+
             if (i % 2 == 0) {
                 pgnBuilder.append(moveNumber).append(". ");
             }
-
-            MoveEntity moveEntity = moves.get(i);
-
-            String notation = moveEntity.getSan() != null
-                    ? moveEntity.getSan()
-                    : moveEntity.getFromSquare().toLowerCase() + moveEntity.getToSquare().toLowerCase();
-
-            pgnBuilder.append(notation).append(" ");
+            pgnBuilder.append(san).append(" ");
+            board.doMove(move);
 
             if (i % 2 != 0) {
                 moveNumber++;
@@ -125,8 +138,19 @@ public class ChessGameManager {
         }
 
         pgnBuilder.append(result);
-
         return pgnBuilder.toString().trim();
     }
 
+    private static String simpleSanFallback(MoveEntity m) {
+        String pieceSymbol;
+        switch (m.getPiece()) {
+            case KNIGHT -> pieceSymbol = "N";
+            case BISHOP -> pieceSymbol = "B";
+            case ROOK -> pieceSymbol = "R";
+            case QUEEN -> pieceSymbol = "Q";
+            case KING -> pieceSymbol = "K";
+            default -> pieceSymbol = "";
+        }
+        return pieceSymbol + m.getToSquare().toLowerCase();
+    }
 }

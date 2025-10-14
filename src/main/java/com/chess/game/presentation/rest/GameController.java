@@ -1,12 +1,15 @@
 package com.chess.game.presentation.rest;
 
 import com.chess.game.application.dto.game.GameStartDTO;
+import com.chess.game.application.dto.game.WinnerGame;
+import com.chess.game.application.dto.player.PlayerProfileDTO;
 import com.chess.game.config.jwt.JwtUtil;
 import com.chess.game.domain.HashidsUtil;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.application.service.interfaces.IGameService;
 import com.chess.game.application.dto.game.CreateGameDTO;
 import com.chess.game.application.dto.game.GameResponseDTO;
+import com.chess.game.infrastructure.entity.PlayerEntity;
 import com.chess.game.util.enums.Color;
 import com.chess.game.util.mapper.GameMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -73,16 +76,18 @@ public class GameController {
         Long whitePlayerId = startedGame.getWhitePlayer().getId();
         Long blackPlayerId = startedGame.getBlackPlayer().getId();
         String code = HashidsUtil.encodeId(startedGame.getId());
+
+        PlayerProfileDTO whitePlayer = getPlayerProfileDTO(whitePlayerId, startedGame.getWhitePlayer());
+        PlayerProfileDTO blackPlayer = getPlayerProfileDTO(blackPlayerId, startedGame.getBlackPlayer());
+
         messagingTemplate.convertAndSendToUser(
                 whitePlayerId.toString(),
                 "/queue/start",
                 GameStartDTO.builder()
                         .color(Color.WHITE)
                         .code(code)
-                        .opponentId(blackPlayerId)
-                        .opponentUsername(startedGame.getBlackPlayer().getUsername())
-                        .rating(startedGame.getBlackPlayer().getRating())
-                        .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
+                        .whitePlayer(whitePlayer)
+                        .blackPlayer(blackPlayer)
                         .build()
         );
         messagingTemplate.convertAndSendToUser(
@@ -91,16 +96,23 @@ public class GameController {
                 GameStartDTO.builder()
                         .color(Color.BLACK)
                         .code(code)
-                        .opponentId(whitePlayerId)
-                        .opponentUsername(startedGame.getWhitePlayer().getUsername())
-                        .rating(startedGame.getWhitePlayer().getRating())
-                        .opponentProfileImage(startedGame.getWhitePlayer().getImageUrl())
+                        .whitePlayer(whitePlayer)
+                        .blackPlayer(blackPlayer)
                         .build()
         );
 
         return ResponseEntity.ok(gameMapper.mapTo(startedGame));
     }
 
+    private PlayerProfileDTO getPlayerProfileDTO(Long id, PlayerEntity player){
+        return PlayerProfileDTO
+                .builder()
+                .id(id)
+                .username(player.getUsername())
+                .rating(player.getRating())
+                .imageUrl(player.getImageUrl())
+                .build();
+    }
     @GetMapping("/{gameId}/color")
     public ResponseEntity<Map<String, String>> getCurrentPlayerColor(@PathVariable String gameId){
         String color = gameService.getCurrentPlayerColor(HashidsUtil.decodeId(gameId));
@@ -112,8 +124,13 @@ public class GameController {
         String token = authHeader.substring(7);
         Long playerId = jwt.extractId(token);
 
-        String msg = gameService.leaveGame(HashidsUtil.decodeId(gameId), playerId);
-        return ResponseEntity.ok(Map.of("leaved", msg));
+        WinnerGame msgWinner = gameService.leaveGame(HashidsUtil.decodeId(gameId), playerId);
+        if(msgWinner != null){
+            Map<String, String> error = Map.of("message", "Your opponent has left the game, "+ msgWinner.getUsername()+ " you are the winner");
+            messagingTemplate.convertAndSendToUser(msgWinner.getWinnerId().toString(), "/queue/errors", error);
+        }
+
+        return ResponseEntity.ok(Map.of("leaved", msgWinner.getMessage()));
     }
 }
 

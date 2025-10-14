@@ -1,5 +1,6 @@
 package com.chess.game.application.dto.game;
 
+import com.chess.game.application.dto.player.PlayerProfileDTO;
 import com.chess.game.util.enums.Color;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GameStartDTO {
-    public Color color;
-    public String code;
-    private Long opponentId;
-    private String opponentUsername;
-    private Integer rating;
-    private String opponentProfileImage;
+    private Color color;
+    private String code;
+    private PlayerProfileDTO whitePlayer;
+    private PlayerProfileDTO blackPlayer;
 }

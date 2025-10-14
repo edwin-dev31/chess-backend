@@ -1,6 +1,7 @@
 package com.chess.game.application.service.interfaces;
 
 import com.chess.game.application.dto.game.InvitationDto;
+import com.chess.game.application.dto.game.WinnerGame;
 import com.chess.game.infrastructure.entity.GameEntity;
 import com.chess.game.application.dto.game.CreateGameDTO;
 import com.chess.game.util.enums.PlayerStatus;
@@ -22,5 +23,5 @@ public interface IGameService {
     InvitationDto acceptInvitation(Long fromPlayerId, Long toUserId);
     InvitationDto rejectInvitation(Long fromPlayerId, Long toUserId);
 
-    String leaveGame(Long gameId, Long playerId);
+    WinnerGame leaveGame(Long gameId, Long playerId);
 }

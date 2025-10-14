@@ -4,5 +4,6 @@ public enum MoveStatus {
     CONTINUES,
     CHECK,
     CHECKMATE,
-    STALEMATE
+    STALEMATE,
+    LEFT
 }

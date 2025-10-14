@@ -1,6 +1,7 @@
 package com.chess.game.application.service.impl;
 
 import com.chess.game.application.dto.game.InvitationDto;
+import com.chess.game.application.dto.game.WinnerGame;
 import com.chess.game.domain.ChessGameManager;
 import com.chess.game.domain.HashidsUtil;
 import com.chess.game.infrastructure.entity.GameEntity;
@@ -217,18 +218,29 @@ public class GameService implements IGameService {
     }
 
     @Override
-    public String leaveGame(Long gameId, Long playerId) {
+    public WinnerGame leaveGame(Long gameId, Long playerId) {
         GameEntity game = gameRepository.findById(gameId)
                 .orElseThrow(() -> new ResourceNotFoundException("Game not found with id: " + gameId));
 
         PlayerEntity player = playerRepository.findById(getOpponentId(gameId, playerId))
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found with this game"));
 
+        Long playerIdWhite = game.getWhitePlayer().getId();
+        Long playerIdBlack = game.getBlackPlayer().getId();
+
+        if (!playerId.equals(playerIdWhite) && !playerId.equals(playerIdBlack)) {
+            throw new ResourceNotFoundException("Player not found in this game");
+        }
+
+        if(game.getStatus() != GameStatus.PLAYING){
+            throw new IllegalStateExceptionCustom("Game is not in playing status");
+        }
+
         game.setStatus(GameStatus.FINISHED);
         game.setFinishedAt(LocalDateTime.now());
         game.setCurrentPlayer(player);
 
         gameRepository.save(game);
-        return "You leave the game successfull";
+        return new WinnerGame(player.getId(), player.getUsername(),"You leave the game successfull");
     }
 }
