@@ -8,6 +8,7 @@ import com.chess.game.infrastructure.entity.PlayerEntity;
 import com.chess.game.application.service.interfaces.IPlayerService;
 import com.chess.game.application.dto.player.PlayerResponseDTO;
 import com.chess.game.application.dto.player.UpdatePlayerDTO;
+import com.chess.game.infrastructure.entity.PlayerGameSummaryView;
 import com.chess.game.util.mapper.PlayerMapper;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -74,6 +75,14 @@ public class PlayerController {
     @SubscribeMapping("/online-players")
     public Set<PlayerOnlineDTO> sendCurrentPlayers() {
         return presence.getOnlinePlayers();
+    }
+
+    @GetMapping("/summary")
+    public List<PlayerGameSummaryView> getSummary(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);
+        Long playerId = jwt.extractId(token);
+
+        return playerService.playerSummary(playerId);
     }
 }
 

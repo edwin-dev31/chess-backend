@@ -4,6 +4,7 @@ import com.chess.game.application.dto.player.PlayerProfileDTO;
 import com.chess.game.infrastructure.entity.PlayerEntity;
 import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.application.dto.player.UpdatePlayerDTO;
+import com.chess.game.infrastructure.entity.PlayerGameSummaryView;
 import com.chess.game.util.enums.PlayerStatus;
 
 import java.util.List;
@@ -19,5 +20,6 @@ public interface IPlayerService {
     PlayerEntity save(CreatePlayerDTO dto);
     PlayerEntity updateStatus(Long id, PlayerStatus status);
     PlayerEntity update(Long id, UpdatePlayerDTO dto);
+    List<PlayerGameSummaryView> playerSummary(Long id);
     void deleteById(Long id);
 }

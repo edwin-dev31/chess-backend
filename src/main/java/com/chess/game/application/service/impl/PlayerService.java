@@ -2,6 +2,8 @@ package com.chess.game.application.service.impl;
 
 import com.chess.game.application.dto.player.PlayerProfileDTO;
 import com.chess.game.infrastructure.entity.PlayerEntity;
+import com.chess.game.infrastructure.entity.PlayerGameSummaryView;
+import com.chess.game.infrastructure.repository.IPlayerGameSummaryRepository;
 import com.chess.game.infrastructure.repository.IPlayerRepository;
 import com.chess.game.application.service.interfaces.IPlayerService;
 import com.chess.game.application.dto.player.CreatePlayerDTO;
@@ -20,10 +22,12 @@ import java.util.Optional;
 public class PlayerService implements IPlayerService {
     private final IPlayerRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final IPlayerGameSummaryRepository summaryRepository;
 
-    public PlayerService(IPlayerRepository repository, PasswordEncoder passwordEncoder) {
+    public PlayerService(IPlayerRepository repository, PasswordEncoder passwordEncoder, IPlayerGameSummaryRepository summaryRepository) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.summaryRepository = summaryRepository;
     }
 
     @Override
@@ -123,6 +127,11 @@ public class PlayerService implements IPlayerService {
         }
 
         return repository.save(playerToUpdate);
+    }
+
+    @Override
+    public List<PlayerGameSummaryView> playerSummary(Long id) {
+        return summaryRepository.findByPlayerId(id);
     }
 
     @Override
