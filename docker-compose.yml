@@ -5,7 +5,7 @@ services:
     build: .
     container_name: chess-app
     ports:
-      - "8443:8443"
+      - "8080:8080"
     environment:
       SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
       SPRING_DATASOURCE_URL: ${DATASOURCE_URL}

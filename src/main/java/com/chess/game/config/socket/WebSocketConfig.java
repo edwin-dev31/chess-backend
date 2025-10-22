@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns(FRONTEND_BASE_URL)
+                .setAllowedOriginPatterns("https://edwin-dev31.github.io*")
                 .withSockJS();
     }
 
