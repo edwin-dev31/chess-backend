@@ -1,13 +1,23 @@
 version: '3.9'
 
 services:
-  db:
-    image: postgres:16
-    container_name: chess_postgres
-    restart: always
-    environment:
-      POSTGRES_USER: edwin
-      POSTGRES_PASSWORD: edwin123
-      POSTGRES_DB: chess_db
+  app:
+    build: .
+    container_name: chess-app
     ports:
-      - "5433:5432"
+      - "8443:8443"
+    environment:
+      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
+      SPRING_DATASOURCE_URL: ${DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${DATASOURCE_DRIVER}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      PASSWORD_SSL: ${PASSWORD_SSL}
+    networks:
+        - chess_network
+
+networks:
+  chess_network:
+    driver: bridge

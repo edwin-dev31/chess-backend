@@ -1,0 +1,9 @@
+# Ignore files and directories that are not needed in the Docker image
+.git
+.gitignore
+.idea
+target
+.mvn
+mvnw
+mvnw.cmd
+README.md

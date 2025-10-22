@@ -115,7 +115,7 @@ public class GameE2ETest {
         assertThat(response.getStatusCode().is2xxSuccessful()).isTrue();
         GameResponseDTO gameResponse = response.getBody();
         assertThat(gameResponse).isNotNull();
-        
+
         long numericGameId = gameResponse.getId();
         gameId = hashids.encode(numericGameId);
         assertThat(gameId).isNotNull();

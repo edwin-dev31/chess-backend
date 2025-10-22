@@ -8,8 +8,10 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
+@Profile("dev")
 public class TlsConfig {
 
     @Bean
@@ -32,9 +34,9 @@ public class TlsConfig {
     private Connector redirectConnector() {
         Connector connector = new Connector("org.apache.coyote.http11.Http11NioProtocol");
         connector.setScheme("http");
-        connector.setPort(8080); // El puerto HTTP que será redirigido
+        connector.setPort(8080);
         connector.setSecure(false);
-        connector.setRedirectPort(8443); // El puerto HTTPS al que se redirige
+        connector.setRedirectPort(8443);
         return connector;
     }
 }
