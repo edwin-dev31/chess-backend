@@ -94,7 +94,7 @@ public class MoveService implements IMoveService {
             game.setCurrentPlayer(playerWhoMoved);
             game.setFinishedAt(LocalDateTime.now());
         } else if (endStatus == MoveStatus.STALEMATE) {
-            game.setStatus(GameStatus.FINISHED);
+            // game.setStatus(GameStatus.FINISHED);
             game.setCurrentPlayer(null);
             game.setFinishedAt(LocalDateTime.now());
         } else {
