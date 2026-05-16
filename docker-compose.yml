@@ -1,23 +1,38 @@
-version: '3.9'
-
 services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: chessdb
+      POSTGRES_USER: chessuser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-chesspass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chessuser -d chessdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
   app:
     build: .
-    container_name: chess-app
+    restart: unless-stopped
     ports:
       - "8080:8080"
+    env_file: .env
     environment:
-      SPRING_APPLICATION_NAME: ${SPRING_APPLICATION_NAME}
-      SPRING_DATASOURCE_URL: ${DATASOURCE_URL}
-      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
-      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: ${DATASOURCE_DRIVER}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      PASSWORD_SSL: ${PASSWORD_SSL}
-    networks:
-        - chess_network
+      DATASOURCE_URL: jdbc:postgresql://db:5432/chessdb
+      DATASOURCE_USERNAME: chessuser
+      DATASOURCE_PASSWORD: ${DB_PASSWORD:-chesspass}
+      DATASOURCE_DRIVER: org.postgresql.Driver
+      PROFILE: prod
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      db:
+        condition: service_healthy
 
-networks:
-  chess_network:
-    driver: bridge
+volumes:
+  postgres_data:

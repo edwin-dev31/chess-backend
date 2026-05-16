@@ -1,9 +1,56 @@
-# Ignore files and directories that are not needed in the Docker image
+# Version control
 .git
 .gitignore
+.gitattributes
+.gitmodules
+
+# IDE and project config
 .idea
+.vscode
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings
+.sts4-cache
+
+# Environment files (contain secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
 target
+**/target
+*.class
+*.jar
+*.war
+!target/*.jar
+
+# Maven wrapper
 .mvn
 mvnw
 mvnw.cmd
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Docker files (prevent context issues)
+Dockerfile
+docker-compose.yml
+docker-compose*.yml
+
+# Documentation
 README.md
+HELP.md
+
+# Node/Frontend (if any)
+node_modules
