@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.9.6-eclipse-temurin-17-alpine AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
@@ -12,10 +12,10 @@ COPY src ./src
 RUN mvn package -DskipTests
 
 # Stage 2: Create the final image
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
 # Create non-root user
-RUN addgroup -S chess && adduser -S chess -G chess
+RUN groupadd -r chess && useradd -r -g chess chess
 
 WORKDIR /app
 
