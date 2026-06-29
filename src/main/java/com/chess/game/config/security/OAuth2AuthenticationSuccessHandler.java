@@ -7,6 +7,7 @@ import com.chess.game.application.dto.player.CreatePlayerDTO;
 import com.chess.game.util.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -19,13 +20,14 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
-import static com.chess.game.util.AppRoutes.FRONTEND_REDIRECTION_URL;
-
 @Component
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtUtil jwtUtil;
     private final PlayerService userService;
+
+    @Value("${app.frontend.redirect-url}")
+    private String redirectUrl;
 
     public OAuth2AuthenticationSuccessHandler(JwtUtil jwtUtil, @Lazy PlayerService userService) {
         this.jwtUtil = jwtUtil;
@@ -71,9 +73,7 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
                 .orElseThrow(() -> new ResourceNotFoundException("Player not found"));
 
         String jwt = jwtUtil.generateToken(player);
-        String redirectUrl = FRONTEND_REDIRECTION_URL + jwt;
-
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect(redirectUrl + jwt);
     }
 
 }
