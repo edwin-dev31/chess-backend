@@ -39,6 +39,8 @@ public class StompAuthChannelInterceptor implements ChannelInterceptor {
                     log.error("Invalid token", e);
                     throw new IllegalArgumentException("Invalid JWT token");
                 }
+            } else {
+                log.warn("No auth token in STOMP CONNECT, allowing anonymous connection");
             }
         }
         return message;

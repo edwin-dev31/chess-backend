@@ -13,12 +13,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
-
-import static com.chess.game.util.AppRoutes.FRONTEND_BASE_URL;
 
 @Configuration
 @EnableWebSecurity
@@ -26,6 +25,9 @@ public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthFilter;
 	private OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler;
+
+	@Value("${app.frontend.base-url}")
+	private String frontendBaseUrl;
 
 	public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler) {
 		this.jwtAuthFilter = jwtAuthFilter;
@@ -51,7 +53,7 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .xssProtection(Customizer.withDefaults())
                 .contentSecurityPolicy(csp ->
-                    csp.policyDirectives("frame-ancestors 'self' " + FRONTEND_BASE_URL)
+                    csp.policyDirectives("frame-ancestors 'self' " + frontendBaseUrl)
                 )
             )
             .build();
@@ -71,7 +73,7 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("https://edwin-dev31.github.io"));
+		configuration.setAllowedOrigins(List.of(frontendBaseUrl));
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 		configuration.setAllowedHeaders(List.of("*"));
 		configuration.setAllowCredentials(true);

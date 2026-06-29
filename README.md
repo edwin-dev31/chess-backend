@@ -1,100 +1,100 @@
-# Proyecto de Ajedrez en Tiempo Real
+# Real-Time Chess Backend
 
-Este es el backend para una aplicación de ajedrez en tiempo real, construida con Spring Boot. Proporciona una API REST para la gestión de usuarios y partidas, y utiliza WebSockets para la comunicación durante el juego.
+This is the backend for a real-time chess application, built with Spring Boot. It provides a REST API for user and game management, and uses WebSockets for in-game communication.
 
-## Características Principales
+## Features
 
-- **Autenticación de Usuarios:** Registro y login con sistema propio basado en JWT, y opción de login con Google (OAuth2).
-- **Gestión de Presencia:** Muestra los jugadores conectados en tiempo real.
-- **Sistema de Invitaciones:** Permite a los jugadores invitarse mutuamente a una partida.
-- **Juego en Tiempo Real:** Comunicación bidireccional mediante WebSockets (STOMP) para el envío de movimientos y actualizaciones del estado del tablero (FEN).
-- **Validación de Movimientos:** La lógica del juego en el backend valida cada movimiento según las reglas del ajedrez.
-- **Persistencia:** Guarda el estado de las partidas y los movimientos en una base de datos PostgreSQL.
-- **Seguridad:** La comunicación está asegurada mediante TLS/SSL (HTTPS y WSS).
+- **User Authentication:** Register and login with a custom JWT-based system, plus Google OAuth2 login.
+- **Presence Management:** Shows connected players in real time.
+- **Invitation System:** Allows players to invite each other to a game.
+- **Real-Time Gameplay:** Bidirectional communication via WebSockets (STOMP) for moves and board state updates (FEN).
+- **Move Validation:** Server-side chess logic validates every move according to the rules.
+- **Persistence:** Stores game state and moves in a PostgreSQL database.
+- **Security:** Communication is secured via TLS/SSL (HTTPS and WSS).
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## 🚀 Tech Stack
 
 ### Backend
 - **Java 17**
-- **Spring Boot 3:** Framework principal de la aplicación.
-- **Spring Security:** Para la gestión de autenticación y autorización (JWT y OAuth2).
-- **Spring Data JPA & Hibernate:** Para la persistencia de datos y comunicación con la base de datos.
-- **Spring WebSocket:** Para la comunicación en tiempo real con el protocolo STOMP.
-- **PostgreSQL:** Base de datos relacional para almacenar la información.
-- **Flyway:** Para la gestión de migraciones de la base de datos.
-- **Maven:** Como gestor de dependencias y construcción del proyecto.
-- **Lombok:** Para reducir el código repetitivo en las clases de dominio y DTOs.
-- **JJWT (Java JWT):** Para la creación y validación de JSON Web Tokens.
-- **Hashids:** Para ofuscar los IDs numéricos en las URLs.
+- **Spring Boot 3:** Core framework.
+- **Spring Security:** Authentication & authorization (JWT + OAuth2).
+- **Spring Data JPA & Hibernate:** Data persistence.
+- **Spring WebSocket:** Real-time communication via STOMP.
+- **PostgreSQL:** Relational database.
+- **Flyway:** Database migration management.
+- **Maven:** Build and dependency management.
+- **Lombok:** Boilerplate code reduction.
+- **JJWT (Java JWT):** JSON Web Token creation and validation.
+- **Hashids:** Numeric ID obfuscation in URLs.
 
-### Frontend (Inferido)
+### Frontend (Inferred)
 - **TypeScript**
-- **React** (o un framework similar)
-- **SockJS & Stomp.js:** Para la comunicación con el backend a través de WebSockets.
-- **Axios:** Para las llamadas a la API REST.
+- **React** (or similar framework)
+- **SockJS & Stomp.js:** WebSocket communication with the backend.
+- **Axios:** REST API calls.
 
 ### Testing
-- **JUnit 5, Mockito, AssertJ:** Para las pruebas unitarias y de integración.
-- **Spring Test:** Para el soporte de pruebas en el ecosistema Spring.
-- **H2 Database:** Base de datos en memoria para la ejecución de los tests.
+- **JUnit 5, Mockito, AssertJ:** Unit and integration tests.
+- **Spring Test:** Spring ecosystem test support.
+- **H2 Database:** In-memory database for tests.
 
 ---
 
-## 📋 Requisitos Previos
+## 📋 Prerequisites
 
-- **JDK 17** o superior.
-- **Maven 3.8** o superior.
-- **PostgreSQL:** Una instancia de base de datos en ejecución.
-- **Docker (Opcional):** Para levantar fácilmente una base de datos con `docker-compose`.
+- **JDK 17** or higher.
+- **Maven 3.8** or higher.
+- **PostgreSQL:** A running database instance.
+- **Docker (Optional):** To easily spin up a database with `docker-compose`.
 
 ---
 
-## ⚙️ Configuración y Ejecución del Backend
+## ⚙️ Setup & Run
 
-### 1. Clonar el Repositorio
+### 1. Clone the Repository
 
 ```bash
-git clone <URL_DEL_REPOSITORIO>
+git clone <REPOSITORY_URL>
 cd chess-backend
 ```
 
-### 2. Configurar la Base de Datos
+### 2. Configure the Database
 
-La forma más sencilla es usar Docker.
+The easiest way is using Docker:
 
 ```bash
-# Inicia un contenedor de PostgreSQL con los datos de configuración por defecto
+# Starts a PostgreSQL container with default config
 docker-compose up -d
 ```
 
-Si prefieres usar una instancia local de PostgreSQL, asegúrate de que coincida con la configuración en `src/main/resources/application-dev.properties` o crea tu propio perfil.
+If you prefer a local PostgreSQL instance, make sure it matches the configuration in `src/main/resources/application-dev.properties` or create your own profile.
 
-### 3. Configurar Variables de Entorno (Opcional)
+### 3. Configure Environment Variables (Optional)
 
-Para que el login con Google funcione, necesitas crear un `client-id` y un `client-secret` en la [Consola de Google Cloud](https://console.cloud.google.com/apis/credentials) y configurarlos como variables de entorno:
+For Google login to work, create a `client-id` and `client-secret` in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and set them as environment variables:
 
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 
-### 4. Configurar HTTPS (TLS/SSL) para Desarrollo
+### 4. Configure HTTPS (TLS/SSL) for Development
 
-La aplicación está configurada para ejecutarse sobre HTTPS. Si es la primera vez que configuras el proyecto, necesitas generar un certificado local.
+The application is configured to run over HTTPS. If this is your first time setting up the project, you need to generate a local certificate.
 
-1.  **Generar el Keystore:**
-    -   Abre una terminal en la raíz del proyecto.
-    -   Ejecuta el siguiente comando (asegúrate de que la ruta a tu JDK esté configurada o usa la ruta completa a `keytool`).
+1.  **Generate the Keystore:**
+    - Open a terminal in the project root.
+    - Run the following command (make sure your JDK path is configured or use the full path to `keytool`).
     ```bash
     keytool -genkeypair -alias chessapp -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore chess-keystore.p12 -validity 365
     ```
-    -   Cuando te pida una contraseña, introduce una (ej. `password`). Esta debe coincidir con la que está en `application.properties`.
+    - When prompted for a password, enter one (e.g. `password`). It must match the one in `application.properties`.
 
-2.  **Mover el Keystore:**
-    -   Mueve el archivo `chess-keystore.p12` a la carpeta `src/main/resources`.
+2.  **Move the Keystore:**
+    - Move `chess-keystore.p12` to `src/main/resources`.
 
-3.  **Verificar `application.properties`:**
-    -   Asegúrate de que las siguientes propiedades estén configuradas en `src/main/resources/application.properties` y que la contraseña sea la correcta.
+3.  **Verify `application.properties`:**
+    - Make sure the following properties are set in `src/main/resources/application.properties` and that the password is correct.
     ```properties
     server.port=8443
     server.ssl.enabled=true
@@ -103,23 +103,23 @@ La aplicación está configurada para ejecutarse sobre HTTPS. Si es la primera v
     server.ssl.key-alias=chessapp
     ```
 
-### 5. Ejecutar la Aplicación
+### 5. Run the Application
 
-Utiliza el wrapper de Maven para compilar y ejecutar la aplicación:
+Use the Maven wrapper to compile and run:
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-El servidor se iniciará en **`https://localhost:8443/chess`**.
+The server will start at **`https://localhost:8443/chess`**.
 
-> **Nota:** Al acceder por primera vez desde tu navegador, verás una advertencia de seguridad. Debes hacer clic en "Avanzado" y "Proceder a localhost" para aceptar el certificado autofirmado.
+> **Note:** When accessing for the first time from your browser, you will see a security warning. Click "Advanced" and "Proceed to localhost" to accept the self-signed certificate.
 
 ---
 
-## 🧪 Ejecutar los Tests
+## 🧪 Running Tests
 
-Para ejecutar todo el conjunto de pruebas, incluyendo los tests end-to-end, usa el siguiente comando:
+To run the full test suite, including end-to-end tests:
 
 ```bash
 ./mvnw test
