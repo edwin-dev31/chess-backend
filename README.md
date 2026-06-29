@@ -97,6 +97,10 @@ Server starts at **`https://localhost:8443/chess`**.
 ./mvnw test
 ```
 
+## 🌐 Frontend
+
+This backend pairs with the [**Chess Frontend**](https://github.com/edwin-dev31/chess-frontend) — a React 19 + Vite app with real-time WebSocket gameplay.
+
 ## 📄 License
 
 Distributed under the **MIT License**. See [LICENSE](./LICENSE) for more information.
