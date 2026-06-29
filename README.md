@@ -1,126 +1,109 @@
-# Real-Time Chess Backend
+<p align="center">
+  <img src="https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 17">
+  <img src="https://img.shields.io/badge/Spring_Boot-3.5.5-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot 3.5.5">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+  <img src="https://img.shields.io/badge/WebSocket-010101?style=for-the-badge&logo=socketdotio&logoColor=white" alt="WebSocket">
+  <img src="https://img.shields.io/badge/MIT-License-green?style=for-the-badge" alt="MIT License">
+</p>
 
-This is the backend for a real-time chess application, built with Spring Boot. It provides a REST API for user and game management, and uses WebSockets for in-game communication.
+# ♟ Real-Time Chess Backend
 
-## Features
+A production-grade backend for a real-time chess application. Built with **Spring Boot 3**, it provides a secure REST API and WebSocket-based communication for live multiplayer chess games.
 
-- **User Authentication:** Register and login with a custom JWT-based system, plus Google OAuth2 login.
-- **Presence Management:** Shows connected players in real time.
-- **Invitation System:** Allows players to invite each other to a game.
-- **Real-Time Gameplay:** Bidirectional communication via WebSockets (STOMP) for moves and board state updates (FEN).
-- **Move Validation:** Server-side chess logic validates every move according to the rules.
-- **Persistence:** Stores game state and moves in a PostgreSQL database.
-- **Security:** Communication is secured via TLS/SSL (HTTPS and WSS).
+## ✨ Features
 
----
+| Feature | Description |
+|---------|-------------|
+| **Authentication** | JWT-based registration/login + Google OAuth2 |
+| **Live Presence** | See connected players in real time |
+| **Invitations** | Challenge other players to a game |
+| **Real-Time Moves** | Bidirectional WebSocket (STOMP) communication with FEN updates |
+| **Server Validation** | All moves are validated server-side by chess rules |
+| **Game Persistence** | Full game state and move history in PostgreSQL |
+| **TLS Security** | End-to-end encryption via HTTPS / WSS |
 
-## 🚀 Tech Stack
+## 🛠 Tech Stack
 
 ### Backend
-- **Java 17**
-- **Spring Boot 3:** Core framework.
-- **Spring Security:** Authentication & authorization (JWT + OAuth2).
-- **Spring Data JPA & Hibernate:** Data persistence.
-- **Spring WebSocket:** Real-time communication via STOMP.
-- **PostgreSQL:** Relational database.
-- **Flyway:** Database migration management.
-- **Maven:** Build and dependency management.
-- **Lombok:** Boilerplate code reduction.
-- **JJWT (Java JWT):** JSON Web Token creation and validation.
-- **Hashids:** Numeric ID obfuscation in URLs.
-
-### Frontend (Inferred)
-- **TypeScript**
-- **React** (or similar framework)
-- **SockJS & Stomp.js:** WebSocket communication with the backend.
-- **Axios:** REST API calls.
+| Technology | Purpose |
+|------------|---------|
+| **Java 17** | Language |
+| **Spring Boot 3.5.5** | Core framework |
+| **Spring Security** | JWT + OAuth2 authentication |
+| **Spring Data JPA / Hibernate** | ORM & persistence |
+| **Spring WebSocket (STOMP)** | Real-time bidirectional communication |
+| **PostgreSQL** | Relational database |
+| **Flyway** | Database migrations |
+| **Maven** | Build & dependency management |
+| **Lombok** | Boilerplate reduction |
+| **JJWT** | JSON Web Token handling |
+| **Hashids** | ID obfuscation in URLs |
 
 ### Testing
-- **JUnit 5, Mockito, AssertJ:** Unit and integration tests.
-- **Spring Test:** Spring ecosystem test support.
-- **H2 Database:** In-memory database for tests.
-
----
+| Technology | Purpose |
+|------------|---------|
+| **JUnit 5 + Mockito + AssertJ** | Unit & integration tests |
+| **Spring Test** | Spring test support |
+| **H2 Database** | In-memory DB for tests |
 
 ## 📋 Prerequisites
 
-- **JDK 17** or higher.
-- **Maven 3.8** or higher.
-- **PostgreSQL:** A running database instance.
-- **Docker (Optional):** To easily spin up a database with `docker-compose`.
+- JDK 17+
+- Maven 3.8+
+- PostgreSQL instance (or Docker)
+- [Optional] Google OAuth credentials
 
----
+## ⚙️ Getting Started
 
-## ⚙️ Setup & Run
-
-### 1. Clone the Repository
+### 1. Clone & enter
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/edwin-dev31/chess-backend.git
 cd chess-backend
 ```
 
-### 2. Configure the Database
-
-The easiest way is using Docker:
+### 2. Start the database
 
 ```bash
-# Starts a PostgreSQL container with default config
-docker-compose up -d
+docker compose up -d
 ```
 
-If you prefer a local PostgreSQL instance, make sure it matches the configuration in `src/main/resources/application-dev.properties` or create your own profile.
+### 3. Configure Google OAuth (optional)
 
-### 3. Configure Environment Variables (Optional)
+Set environment variables:
+```bash
+GOOGLE_CLIENT_ID=your-client-id
+GOOGLE_CLIENT_SECRET=your-client-secret
+```
 
-For Google login to work, create a `client-id` and `client-secret` in the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) and set them as environment variables:
+### 4. Generate a local SSL certificate
 
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
+```bash
+keytool -genkeypair -alias chessapp -keyalg RSA -keysize 2048 \
+  -storetype PKCS12 -keystore src/main/resources/chess-keystore.p12 -validity 365
+```
 
-### 4. Configure HTTPS (TLS/SSL) for Development
-
-The application is configured to run over HTTPS. If this is your first time setting up the project, you need to generate a local certificate.
-
-1.  **Generate the Keystore:**
-    - Open a terminal in the project root.
-    - Run the following command (make sure your JDK path is configured or use the full path to `keytool`).
-    ```bash
-    keytool -genkeypair -alias chessapp -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore chess-keystore.p12 -validity 365
-    ```
-    - When prompted for a password, enter one (e.g. `password`). It must match the one in `application.properties`.
-
-2.  **Move the Keystore:**
-    - Move `chess-keystore.p12` to `src/main/resources`.
-
-3.  **Verify `application.properties`:**
-    - Make sure the following properties are set in `src/main/resources/application.properties` and that the password is correct.
-    ```properties
-    server.port=8443
-    server.ssl.enabled=true
-    server.ssl.key-store=classpath:chess-keystore.p12
-    server.ssl.key-store-password=password
-    server.ssl.key-alias=chessapp
-    ```
-
-### 5. Run the Application
-
-Use the Maven wrapper to compile and run:
+### 5. Run
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-The server will start at **`https://localhost:8443/chess`**.
+Server starts at **`https://localhost:8443/chess`**.
 
-> **Note:** When accessing for the first time from your browser, you will see a security warning. Click "Advanced" and "Proceed to localhost" to accept the self-signed certificate.
-
----
-
-## 🧪 Running Tests
-
-To run the full test suite, including end-to-end tests:
+## 🧪 Tests
 
 ```bash
 ./mvnw test
 ```
+
+## 📄 License
+
+Distributed under the **MIT License**. See [LICENSE](./LICENSE) for more information.
+
+---
+
+<p align="center">
+  <a href="https://github.com/edwin-dev31/chess-backend/issues">Report a bug</a> ·
+  <a href="https://github.com/edwin-dev31/chess-backend/pulls">Request a feature</a>
+</p>
